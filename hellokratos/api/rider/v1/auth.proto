@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package rider.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "hellokratos/api/rider/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.api.helloworld.v1";
+option java_outer_classname = "HelloworldProtoV1";
+
+// 骑手认证服务
+service Auth {
+  // 手机号+验证码登录
+  rpc LoginByPhone (LoginByPhoneRequest) returns (LoginReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/login/phone"
+      body:"*"
+    };
+  }
+  //密码登录
+  rpc LoginByPassword (LoginByPasswordRequest) returns (LoginReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/login/password"
+      body:"*"
+    };
+  }
+  //登出
+  rpc Logout (LogoutRequest) returns (LogoutReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/logout"
+      body:"*"
+    };
+  }
+  //刷新token
+  rpc RefreshToken (RefreshTokenRequest) returns (LoginReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/token/refresh"
+      body:"*"
+    };
+  }
+}
+
+// 手机号登录请求
+message LoginByPhoneRequest {
+  string phone = 1;
+  string code=2;
+}
+
+// 密码登录请求
+message LoginByPasswordRequest {
+  string phone = 1;
+  string password=2;
+}
+
+//登出请求
+message LogoutRequest{
+  string user_id=1;//用户id
+}
+
+//刷新token请求
+message RefreshTokenRequest{
+  string refresh_token=1;//刷新令牌
+}
+
+//登录响应
+message LoginReply{
+  string user_id=1;//用户id
+  string token=2;//访问令牌
+  string refresh_token=3;//刷新令牌
+  int64 expires_in=4;//过期时间(秒)
+}
+
+//登出响应
+message LogoutReply{
+  bool success=1;//是否成功
+}

@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package rider.v1;
+
+import "errors/errors.proto";
+
+option go_package = "hellokratos/api/rider/v1;v1";
+option java_multiple_files = true;
+option java_package = "rider.v1";
+option objc_class_prefix = "APIHelloworldV1";
+
+enum ErrorReason {
+  option (errors.default_code)=500;
+
+  GREETER_UNSPECIFIED = 0;
+  USER_NOT_FOUND = 1 [(errors.code) = 404];
+  INVALID_PHONE_OR_CODE = 2 [(errors.code) = 400];
+  INVALID_PASSWORD = 3 [(errors.code) = 400];
+  TOKEN_EXPIRED = 4 [(errors.code) = 401];
+  LOGOUT_FAILED = 5 [(errors.code) = 500];
+}
