@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-http v2.9.2
 // - protoc             v3.19.4
-// source: api/rider/v1/auth.proto
+// source: rider/v1/auth.proto
 
 package v1
 
@@ -19,28 +19,106 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationAuthLoginByPassword = "/rider.v1.Auth/LoginByPassword"
-const OperationAuthLoginByPhone = "/rider.v1.Auth/LoginByPhone"
-const OperationAuthLogout = "/rider.v1.Auth/Logout"
-const OperationAuthRefreshToken = "/rider.v1.Auth/RefreshToken"
+const OperationAuthLoginByPassword = "/api.rider.v1.Auth/LoginByPassword"
+const OperationAuthLoginByPhone = "/api.rider.v1.Auth/LoginByPhone"
+const OperationAuthLoginByThirdParty = "/api.rider.v1.Auth/LoginByThirdParty"
+const OperationAuthLogout = "/api.rider.v1.Auth/Logout"
+const OperationAuthRefreshToken = "/api.rider.v1.Auth/RefreshToken"
+const OperationAuthRegister = "/api.rider.v1.Auth/Register"
+const OperationAuthSendCode = "/api.rider.v1.Auth/SendCode"
 
 type AuthHTTPServer interface {
 	// LoginByPassword密码登录
 	LoginByPassword(context.Context, *LoginByPasswordRequest) (*LoginReply, error)
 	// LoginByPhone 手机号+验证码登录
 	LoginByPhone(context.Context, *LoginByPhoneRequest) (*LoginReply, error)
+	// LoginByThirdParty第三方登录
+	LoginByThirdParty(context.Context, *LoginByThirdPartyRequest) (*LoginReply, error)
 	// Logout登出
 	Logout(context.Context, *LogoutRequest) (*LogoutReply, error)
 	// RefreshToken刷新token
 	RefreshToken(context.Context, *RefreshTokenRequest) (*LoginReply, error)
+	// Register注册
+	Register(context.Context, *RegisterRequest) (*LoginReply, error)
+	// SendCode发送验证码
+	SendCode(context.Context, *SendCodeRequest) (*SendCodeReply, error)
 }
 
 func RegisterAuthHTTPServer(s *http.Server, srv AuthHTTPServer) {
 	r := s.Route("/")
+	r.POST("/rider/v1/register", _Auth_Register0_HTTP_Handler(srv))
+	r.POST("/rider/v1/login/third", _Auth_LoginByThirdParty0_HTTP_Handler(srv))
+	r.POST("/rider/v1/code/send", _Auth_SendCode0_HTTP_Handler(srv))
 	r.POST("/rider/v1/login/phone", _Auth_LoginByPhone0_HTTP_Handler(srv))
 	r.POST("/rider/v1/login/password", _Auth_LoginByPassword0_HTTP_Handler(srv))
 	r.POST("/rider/v1/logout", _Auth_Logout0_HTTP_Handler(srv))
 	r.POST("/rider/v1/token/refresh", _Auth_RefreshToken0_HTTP_Handler(srv))
+}
+
+func _Auth_Register0_HTTP_Handler(srv AuthHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in RegisterRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAuthRegister)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.Register(ctx, req.(*RegisterRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*LoginReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Auth_LoginByThirdParty0_HTTP_Handler(srv AuthHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in LoginByThirdPartyRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAuthLoginByThirdParty)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.LoginByThirdParty(ctx, req.(*LoginByThirdPartyRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*LoginReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Auth_SendCode0_HTTP_Handler(srv AuthHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in SendCodeRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAuthSendCode)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.SendCode(ctx, req.(*SendCodeRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*SendCodeReply)
+		return ctx.Result(200, reply)
+	}
 }
 
 func _Auth_LoginByPhone0_HTTP_Handler(srv AuthHTTPServer) func(ctx http.Context) error {
@@ -136,10 +214,16 @@ type AuthHTTPClient interface {
 	LoginByPassword(ctx context.Context, req *LoginByPasswordRequest, opts ...http.CallOption) (rsp *LoginReply, err error)
 	// LoginByPhone 手机号+验证码登录
 	LoginByPhone(ctx context.Context, req *LoginByPhoneRequest, opts ...http.CallOption) (rsp *LoginReply, err error)
+	// LoginByThirdParty第三方登录
+	LoginByThirdParty(ctx context.Context, req *LoginByThirdPartyRequest, opts ...http.CallOption) (rsp *LoginReply, err error)
 	// Logout登出
 	Logout(ctx context.Context, req *LogoutRequest, opts ...http.CallOption) (rsp *LogoutReply, err error)
 	// RefreshToken刷新token
 	RefreshToken(ctx context.Context, req *RefreshTokenRequest, opts ...http.CallOption) (rsp *LoginReply, err error)
+	// Register注册
+	Register(ctx context.Context, req *RegisterRequest, opts ...http.CallOption) (rsp *LoginReply, err error)
+	// SendCode发送验证码
+	SendCode(ctx context.Context, req *SendCodeRequest, opts ...http.CallOption) (rsp *SendCodeReply, err error)
 }
 
 type AuthHTTPClientImpl struct {
@@ -178,6 +262,20 @@ func (c *AuthHTTPClientImpl) LoginByPhone(ctx context.Context, in *LoginByPhoneR
 	return &out, nil
 }
 
+// LoginByThirdParty第三方登录
+func (c *AuthHTTPClientImpl) LoginByThirdParty(ctx context.Context, in *LoginByThirdPartyRequest, opts ...http.CallOption) (*LoginReply, error) {
+	var out LoginReply
+	pattern := "/rider/v1/login/third"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAuthLoginByThirdParty))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // Logout登出
 func (c *AuthHTTPClientImpl) Logout(ctx context.Context, in *LogoutRequest, opts ...http.CallOption) (*LogoutReply, error) {
 	var out LogoutReply
@@ -198,6 +296,34 @@ func (c *AuthHTTPClientImpl) RefreshToken(ctx context.Context, in *RefreshTokenR
 	pattern := "/rider/v1/token/refresh"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationAuthRefreshToken))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// Register注册
+func (c *AuthHTTPClientImpl) Register(ctx context.Context, in *RegisterRequest, opts ...http.CallOption) (*LoginReply, error) {
+	var out LoginReply
+	pattern := "/rider/v1/register"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAuthRegister))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// SendCode发送验证码
+func (c *AuthHTTPClientImpl) SendCode(ctx context.Context, in *SendCodeRequest, opts ...http.CallOption) (*SendCodeReply, error) {
+	var out SendCodeReply
+	pattern := "/rider/v1/code/send"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAuthSendCode))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 
 	v1 "hellokratos/api/helloworld/v1"
 	"hellokratos/internal/biz"
+	"hellokratos/internal/data/model"
 )
 
 // GreeterService is a greeter service.
@@ -21,7 +22,7 @@ func NewGreeterService(uc *biz.GreeterUsecase) *GreeterService {
 
 // SayHello implements helloworld.GreeterServer.
 func (s *GreeterService) SayHello(ctx context.Context, in *v1.HelloRequest) (*v1.HelloReply, error) {
-	g, err := s.uc.CreateGreeter(ctx, &biz.Greeter{Hello: in.Name})
+	g, err := s.uc.CreateGreeter(ctx, &model.Greeter{Hello: in.Name})
 	if err != nil {
 		return nil, err
 	}

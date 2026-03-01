@@ -8,8 +8,20 @@ server:
 data:
   database:
     driver: mysql
-    source: root:root@tcp(127.0.0.1:3306)/kratos?parseTime=True&loc=Local
+    source: root:4ay1nkal3u8ed77y@tcp(115.190.45.90:3306)/mtrider?parseTime=True&loc=Local
   redis:
-    addr: 127.0.0.1:6379
+    addr: 115.190.45.90:6379
+    password: 4ay1nkal3u8ed77y
     read_timeout: 0.2s
     write_timeout: 0.2s
+    Jwt:
+      SecretKey: 4ay1nkal3u8ed77y
+  rabbitmq:
+    addr: amqp://rabbitmq:rabbitmq@115.190.45.90:5672/
+    username: rabbitmq
+    password: rabbitmq
+    virtual_host: /
+    connection_timeout: 5s
+  sms:
+    api_id: "C35443821"
+    api_key: "92e454aa423a2125be6a3cba3380fff9"

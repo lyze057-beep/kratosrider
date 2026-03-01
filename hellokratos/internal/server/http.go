@@ -2,6 +2,7 @@ package server
 
 import (
 	v1 "hellokratos/api/helloworld/v1"
+	riderV1 "hellokratos/api/rider/v1"
 	"hellokratos/internal/conf"
 	"hellokratos/internal/service"
 
@@ -11,7 +12,7 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, authService *service.AuthService, orderService *service.OrderService, messageService *service.MessageService, incomeService *service.IncomeService, logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -28,5 +29,9 @@ func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, logger log.L
 	}
 	srv := http.NewServer(opts...)
 	v1.RegisterGreeterHTTPServer(srv, greeter)
+	riderV1.RegisterAuthHTTPServer(srv, authService)
+	riderV1.RegisterOrderHTTPServer(srv, orderService)
+	riderV1.RegisterMessageHTTPServer(srv, messageService)
+	riderV1.RegisterIncomeHTTPServer(srv, incomeService)
 	return srv
 }

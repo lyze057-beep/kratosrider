@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package rider.v1;
+package api.rider.v1;
 
 import "google/api/annotations.proto";
 
@@ -11,6 +11,27 @@ option java_outer_classname = "HelloworldProtoV1";
 
 // 骑手认证服务
 service Auth {
+  //注册
+  rpc Register (RegisterRequest) returns (LoginReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/register"
+      body:"*"
+    };
+  }
+  //第三方登录
+  rpc LoginByThirdParty (LoginByThirdPartyRequest) returns (LoginReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/login/third",
+      body: "*"
+    };
+  }
+  //发送验证码
+  rpc SendCode (SendCodeRequest) returns (SendCodeReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/code/send"
+      body:"*"
+    };
+  }
   // 手机号+验证码登录
   rpc LoginByPhone (LoginByPhoneRequest) returns (LoginReply) {
     option (google.api.http) = {
@@ -41,6 +62,19 @@ service Auth {
   }
 }
 
+//注册请求
+message RegisterRequest {
+  string phone = 1;
+  string password = 2;
+  string code = 3;
+  string nickname = 4;
+}
+
+//短信发送请求
+message SendCodeRequest{
+  string phone=1;
+  string type=2;
+}
 // 手机号登录请求
 message LoginByPhoneRequest {
   string phone = 1;
@@ -69,9 +103,32 @@ message LoginReply{
   string token=2;//访问令牌
   string refresh_token=3;//刷新令牌
   int64 expires_in=4;//过期时间(秒)
+  UserInfo user_info =5;
 }
 
+
+//用户信息
+message UserInfo{
+  string user_id=1;
+  string phone=2;
+  string nickname=3;
+  string avatar=4;
+  int32 status=5;
+}
 //登出响应
 message LogoutReply{
   bool success=1;//是否成功
+}
+
+//发送短信响应
+message SendCodeReply {
+  string request_id=1;
+  int32 expire_seconds=2;
+}
+
+//第三方登录
+message LoginByThirdPartyRequest {
+  string platform = 1;  // wechat/alipay
+  string code = 2;      // 授权码
+  string state = 3;
 }

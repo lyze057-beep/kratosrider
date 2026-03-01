@@ -2,6 +2,7 @@ package server
 
 import (
 	v1 "hellokratos/api/helloworld/v1"
+	riderV1 "hellokratos/api/rider/v1"
 	"hellokratos/internal/conf"
 	"hellokratos/internal/service"
 
@@ -11,7 +12,7 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, authService *service.AuthService, orderService *service.OrderService, messageService *service.MessageService, incomeService *service.IncomeService, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -28,5 +29,9 @@ func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, logger log.L
 	}
 	srv := grpc.NewServer(opts...)
 	v1.RegisterGreeterServer(srv, greeter)
+	riderV1.RegisterAuthServer(srv, authService)
+	riderV1.RegisterOrderServer(srv, orderService)
+	riderV1.RegisterMessageServer(srv, messageService)
+	riderV1.RegisterIncomeServer(srv, incomeService)
 	return srv
 }

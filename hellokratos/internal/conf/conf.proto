@@ -27,15 +27,27 @@ message Server {
 
 message Data {
   message Database {
-    string driver = 1;
-    string source = 2;
+    string source = 1;
   }
   message Redis {
-    string network = 1;
-    string addr = 2;
+    string addr = 1;
+    string password = 2;
     google.protobuf.Duration read_timeout = 3;
     google.protobuf.Duration write_timeout = 4;
   }
+  message Rabbitmq {
+    string addr = 1;
+    string username = 2;
+    string password = 3;
+    string virtual_host = 4;
+    google.protobuf.Duration connection_timeout = 5;
+  }
+  message Sms {
+    string api_id = 1;
+    string api_key = 2;
+  }
   Database database = 1;
   Redis redis = 2;
+  Rabbitmq rabbitmq = 3;
+  Sms sms = 4;
 }

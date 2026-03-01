@@ -3,6 +3,9 @@ package biz
 import (
 	"context"
 
+	"hellokratos/internal/data"
+	"hellokratos/internal/data/model"
+
 	v1 "hellokratos/api/helloworld/v1"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -14,32 +17,18 @@ var (
 	ErrUserNotFound = errors.NotFound(v1.ErrorReason_USER_NOT_FOUND.String(), "user not found")
 )
 
-// Greeter is a Greeter model.
-type Greeter struct {
-	Hello string
-}
-
-// GreeterRepo is a Greater repo.
-type GreeterRepo interface {
-	Save(context.Context, *Greeter) (*Greeter, error)
-	Update(context.Context, *Greeter) (*Greeter, error)
-	FindByID(context.Context, int64) (*Greeter, error)
-	ListByHello(context.Context, string) ([]*Greeter, error)
-	ListAll(context.Context) ([]*Greeter, error)
-}
-
 // GreeterUsecase is a Greeter usecase.
 type GreeterUsecase struct {
-	repo GreeterRepo
+	repo data.GreeterRepo
 }
 
 // NewGreeterUsecase new a Greeter usecase.
-func NewGreeterUsecase(repo GreeterRepo) *GreeterUsecase {
+func NewGreeterUsecase(repo data.GreeterRepo) *GreeterUsecase {
 	return &GreeterUsecase{repo: repo}
 }
 
 // CreateGreeter creates a Greeter, and returns the new Greeter.
-func (uc *GreeterUsecase) CreateGreeter(ctx context.Context, g *Greeter) (*Greeter, error) {
+func (uc *GreeterUsecase) CreateGreeter(ctx context.Context, g *model.Greeter) (*model.Greeter, error) {
 	log.Infof("CreateGreeter: %v", g.Hello)
 	return uc.repo.Save(ctx, g)
 }

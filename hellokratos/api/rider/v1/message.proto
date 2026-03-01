@@ -1,0 +1,296 @@
+syntax = "proto3";
+
+package api.rider.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "hellokratos/api/rider/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.api.helloworld.v1";
+option java_outer_classname = "HelloworldProtoV1";
+
+// 消息服务
+service Message {
+  // 发送消息
+  rpc SendMessage (SendMessageRequest) returns (SendMessageReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/message/send"
+      body: "*"
+    };
+  }
+  // 获取消息列表
+  rpc GetMessageList (GetMessageListRequest) returns (GetMessageListReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/messages"
+    };
+  }
+  // 获取未读消息数量
+  rpc GetUnreadMessageCount (GetUnreadMessageCountRequest) returns (GetUnreadMessageCountReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/messages/unread/count"
+    };
+  }
+  // 标记消息为已读
+  rpc MarkMessageAsRead (MarkMessageAsReadRequest) returns (MarkMessageAsReadReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/message/read"
+      body: "*"
+    };
+  }
+  // 实时消息推送（WebSocket）
+  rpc SubscribeMessages (SubscribeMessagesRequest) returns (stream SubscribeMessagesReply) {
+  }
+  
+  // ========== 群聊功能 ==========
+  
+  // 创建群组
+  rpc CreateGroup (CreateGroupRequest) returns (CreateGroupReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/group/create"
+      body: "*"
+    };
+  }
+  // 加入群组
+  rpc JoinGroup (JoinGroupRequest) returns (JoinGroupReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/group/join"
+      body: "*"
+    };
+  }
+  // 退出群组
+  rpc LeaveGroup (LeaveGroupRequest) returns (LeaveGroupReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/group/leave"
+      body: "*"
+    };
+  }
+  // 获取群组列表
+  rpc GetGroupList (GetGroupListRequest) returns (GetGroupListReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/groups"
+    };
+  }
+  // 获取群组成员列表
+  rpc GetGroupMembers (GetGroupMembersRequest) returns (GetGroupMembersReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/group/members"
+    };
+  }
+  // 发送群聊消息
+  rpc SendGroupMessage (SendGroupMessageRequest) returns (SendGroupMessageReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/group/message/send"
+      body: "*"
+    };
+  }
+  // 获取群聊消息列表
+  rpc GetGroupMessageList (GetGroupMessageListRequest) returns (GetGroupMessageListReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/group/messages"
+    };
+  }
+  // 实时群聊消息推送（WebSocket）
+  rpc SubscribeGroupMessages (SubscribeGroupMessagesRequest) returns (stream SubscribeGroupMessagesReply) {
+  }
+}
+
+// 发送消息请求
+message SendMessageRequest {
+  int64 from_id = 1;
+  int64 to_id = 2;
+  string content = 3;
+  int32 type = 4; // 0-文本 1-图片 2-语音
+}
+
+// 发送消息响应
+message SendMessageReply {
+  bool success = 1;
+  string message = 2;
+}
+
+// 获取消息列表请求
+message GetMessageListRequest {
+  int64 user_id = 1;
+  int32 limit = 2;
+}
+
+// 获取消息列表响应
+message GetMessageListReply {
+  repeated MessageInfo messages = 1;
+  int32 total = 2;
+}
+
+// 获取未读消息数量请求
+message GetUnreadMessageCountRequest {
+  int64 user_id = 1;
+}
+
+// 获取未读消息数量响应
+message GetUnreadMessageCountReply {
+  int64 count = 1;
+}
+
+// 标记消息为已读请求
+message MarkMessageAsReadRequest {
+  int64 message_id = 1;
+}
+
+// 标记消息为已读响应
+message MarkMessageAsReadReply {
+  bool success = 1;
+  string message = 2;
+}
+
+// 订阅消息请求
+message SubscribeMessagesRequest {
+  int64 user_id = 1;
+}
+
+// 订阅消息响应
+message SubscribeMessagesReply {
+  MessageInfo message = 1;
+}
+
+// 消息信息
+message MessageInfo {
+  int64 id = 1;
+  int64 from_id = 2;
+  int64 to_id = 3;
+  string content = 4;
+  int32 type = 5;
+  int32 status = 6;
+  string created_at = 7;
+}
+
+// ========== 群聊消息类型 ==========
+
+// 群组信息
+message GroupInfo {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  int64 creator_id = 4;
+  int32 member_count = 5;
+  string created_at = 6;
+}
+
+// 群组成员信息
+message GroupMemberInfo {
+  int64 user_id = 1;
+  string nickname = 2;
+  int32 role = 3; // 0-成员 1-管理员 2-群主
+  string joined_at = 4;
+}
+
+// 群聊消息信息
+message GroupMessageInfo {
+  int64 id = 1;
+  int64 group_id = 2;
+  int64 from_id = 3;
+  string from_nickname = 4;
+  string content = 5;
+  int32 type = 6; // 0-文本 1-图片 2-语音
+  string created_at = 7;
+}
+
+// 创建群组请求
+message CreateGroupRequest {
+  int64 creator_id = 1;
+  string name = 2;
+  string description = 3;
+  repeated int64 member_ids = 4; // 初始成员ID列表
+}
+
+// 创建群组响应
+message CreateGroupReply {
+  bool success = 1;
+  string message = 2;
+  GroupInfo group = 3;
+}
+
+// 加入群组请求
+message JoinGroupRequest {
+  int64 user_id = 1;
+  int64 group_id = 2;
+}
+
+// 加入群组响应
+message JoinGroupReply {
+  bool success = 1;
+  string message = 2;
+}
+
+// 退出群组请求
+message LeaveGroupRequest {
+  int64 user_id = 1;
+  int64 group_id = 2;
+}
+
+// 退出群组响应
+message LeaveGroupReply {
+  bool success = 1;
+  string message = 2;
+}
+
+// 获取群组列表请求
+message GetGroupListRequest {
+  int64 user_id = 1;
+  int32 limit = 2;
+}
+
+// 获取群组列表响应
+message GetGroupListReply {
+  repeated GroupInfo groups = 1;
+  int32 total = 2;
+}
+
+// 获取群组成员列表请求
+message GetGroupMembersRequest {
+  int64 group_id = 1;
+  int32 limit = 2;
+}
+
+// 获取群组成员列表响应
+message GetGroupMembersReply {
+  repeated GroupMemberInfo members = 1;
+  int32 total = 2;
+}
+
+// 发送群聊消息请求
+message SendGroupMessageRequest {
+  int64 from_id = 1;
+  int64 group_id = 2;
+  string content = 3;
+  int32 type = 4; // 0-文本 1-图片 2-语音
+}
+
+// 发送群聊消息响应
+message SendGroupMessageReply {
+  bool success = 1;
+  string message = 2;
+  GroupMessageInfo group_message = 3;
+}
+
+// 获取群聊消息列表请求
+message GetGroupMessageListRequest {
+  int64 group_id = 1;
+  int64 last_id = 2; // 最后一条消息ID，用于分页
+  int32 limit = 3;
+}
+
+// 获取群聊消息列表响应
+message GetGroupMessageListReply {
+  repeated GroupMessageInfo messages = 1;
+  int32 total = 2;
+}
+
+// 订阅群聊消息请求
+message SubscribeGroupMessagesRequest {
+  int64 user_id = 1;
+  int64 group_id = 2; // 0表示订阅所有加入的群组
+}
+
+// 订阅群聊消息响应
+message SubscribeGroupMessagesReply {
+  GroupMessageInfo message = 1;
+}

@@ -1,0 +1,155 @@
+syntax = "proto3";
+
+package api.rider.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "hellokratos/api/rider/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.api.helloworld.v1";
+option java_outer_classname = "HelloworldProtoV1";
+
+// 收入服务
+service Income {
+  // 创建收入记录
+  rpc CreateIncome (CreateIncomeRequest) returns (CreateIncomeReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/income/create"
+      body: "*"
+    };
+  }
+  // 获取收入列表
+  rpc GetIncomeList (GetIncomeListRequest) returns (GetIncomeListReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/incomes"
+    };
+  }
+  // 获取总收入
+  rpc GetTotalIncome (GetTotalIncomeRequest) returns (GetTotalIncomeReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/income/total"
+    };
+  }
+  // 申请提现
+  rpc ApplyWithdrawal (ApplyWithdrawalRequest) returns (ApplyWithdrawalReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/withdrawal/apply"
+      body: "*"
+    };
+  }
+  // 获取提现列表
+  rpc GetWithdrawalList (GetWithdrawalListRequest) returns (GetWithdrawalListReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/withdrawals"
+    };
+  }
+  // 更新提现状态
+  rpc UpdateWithdrawalStatus (UpdateWithdrawalStatusRequest) returns (UpdateWithdrawalStatusReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/withdrawal/update"
+      body: "*"
+    };
+  }
+}
+
+// 创建收入记录请求
+message CreateIncomeRequest {
+  int64 order_id = 1; // 订单ID，根据订单距离自动计算收入
+  int32 income_type = 2; // 类型：0-订单收入 1-其他收入（可选，默认0）
+  int32 income_status = 3; // 状态：0-待结算 1-已结算（可选，默认0）
+}
+
+// 创建收入记录响应
+message CreateIncomeReply {
+  bool success = 1;
+  string message = 2;
+  int64 income_id = 3;
+  float amount = 4; // 计算后的收入金额
+  float distance = 5; // 订单距离（公里）
+}
+
+// 获取收入列表请求
+message GetIncomeListRequest {
+  int64 rider_id = 1;
+  int32 limit = 2;
+}
+
+// 获取收入列表响应
+message GetIncomeListReply {
+  repeated IncomeInfo incomes = 1;
+  int32 total = 2;
+}
+
+// 获取总收入请求
+message GetTotalIncomeRequest {
+  int64 rider_id = 1;
+}
+
+// 获取总收入响应
+message GetTotalIncomeReply {
+  float total = 1;
+}
+
+// 申请提现请求
+message ApplyWithdrawalRequest {
+  int64 rider_id = 1;
+  float amount = 2;
+  string platform = 3; // alipay, wechat, bank
+  string account = 4;
+}
+
+// 申请提现响应
+message ApplyWithdrawalReply {
+  bool success = 1;
+  string message = 2;
+  int64 withdrawal_id = 3;
+}
+
+// 获取提现列表请求
+message GetWithdrawalListRequest {
+  int64 rider_id = 1;
+  int32 limit = 2;
+}
+
+// 获取提现列表响应
+message GetWithdrawalListReply {
+  repeated WithdrawalInfo withdrawals = 1;
+  int32 total = 2;
+}
+
+// 收入信息
+message IncomeInfo {
+  int64 id = 1;
+  int64 rider_id = 2;
+  int64 order_id = 3;
+  float amount = 4;
+  int32 income_type = 5; // 类型：0-订单收入 1-其他收入
+  int32 income_status = 6; // 状态：0-待结算 1-已结算 2-已提现
+  string created_at = 7;
+}
+
+// 提现信息
+message WithdrawalInfo {
+  int64 id = 1;
+  int64 rider_id = 2;
+  float amount = 3;
+  string platform = 4;
+  string account = 5;
+  int32 status = 6;
+  string transaction_id = 7;
+  string created_at = 8;
+  string updated_at = 9;
+}
+
+// 更新提现状态请求
+message UpdateWithdrawalStatusRequest {
+  int64 withdrawal_id = 1; // 提现ID
+  int32 status = 2; // 状态：0-待处理 1-处理中 2-成功 3-失败
+  string transaction_id = 3; // 交易ID（可选）
+}
+
+// 更新提现状态响应
+message UpdateWithdrawalStatusReply {
+  bool success = 1;
+  string message = 2;
+}

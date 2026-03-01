@@ -1,0 +1,148 @@
+syntax = "proto3";
+
+package api.rider.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "hellokratos/api/rider/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.api.helloworld.v1";
+option java_outer_classname = "HelloworldProtoV1";
+
+// 订单服务
+service Order {
+  // 创建订单
+  rpc CreateOrder (CreateOrderRequest) returns (CreateOrderReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/order/create"
+      body: "*"
+    };
+  }
+  // 获取订单列表
+  rpc GetOrderList (GetOrderListRequest) returns (GetOrderListReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/orders"
+    };
+  }
+  // 获取订单详情
+  rpc GetOrderDetail (GetOrderDetailRequest) returns (GetOrderDetailReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/order/{order_id}"
+    };
+  }
+  // 接单
+  rpc AcceptOrder (AcceptOrderRequest) returns (AcceptOrderReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/order/accept"
+      body: "*"
+    };
+  }
+  // 更新订单状态
+  rpc UpdateOrderStatus (UpdateOrderStatusRequest) returns (UpdateOrderStatusReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/order/status"
+      body: "*"
+    };
+  }
+  // 实时订单推送（WebSocket）
+  rpc SubscribeOrders (SubscribeOrdersRequest) returns (stream SubscribeOrdersReply) {
+  }
+}
+
+// 获取订单列表请求
+message GetOrderListRequest {
+  int32 status = 1; // -1表示全部状态
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+// 获取订单列表响应
+message GetOrderListReply {
+  repeated OrderInfo orders = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// 获取订单详情请求
+message GetOrderDetailRequest {
+  int64 order_id = 1;
+}
+
+// 获取订单详情响应
+message GetOrderDetailReply {
+  OrderInfo order = 1;
+}
+
+// 接单请求
+message AcceptOrderRequest {
+  int64 order_id = 1;
+  int64 rider_id = 2;
+}
+
+// 接单响应
+message AcceptOrderReply {
+  bool success = 1;
+  string message = 2;
+}
+
+// 更新订单状态请求
+message UpdateOrderStatusRequest {
+  int64 order_id = 1;
+  int32 status = 2;
+}
+
+// 更新订单状态响应
+message UpdateOrderStatusReply {
+  bool success = 1;
+  string message = 2;
+}
+
+// 订阅订单请求
+message SubscribeOrdersRequest {
+  int64 rider_id = 1;
+  float lat = 2; // 骑手纬度
+  float lng = 3; // 骑手经度
+}
+
+// 订阅订单响应
+message SubscribeOrdersReply {
+  OrderInfo order = 1;
+  int32 type = 2; // 1-新订单 2-订单状态更新
+}
+
+// 创建订单请求
+message CreateOrderRequest {
+  string origin = 1; // 起点
+  string destination = 2; // 终点
+  float origin_lat = 3; // 起点纬度
+  float origin_lng = 4; // 起点经度
+  float dest_lat = 5; // 终点纬度
+  float dest_lng = 6; // 终点经度
+  float amount = 7; // 订单金额
+}
+
+// 创建订单响应
+message CreateOrderReply {
+  bool success = 1;
+  string message = 2;
+  OrderInfo order = 3;
+}
+
+// 订单信息
+message OrderInfo {
+  int64 id = 1;
+  string order_no = 2;
+  int32 status = 3;
+  string origin = 4;
+  string destination = 5;
+  float origin_lat = 6;
+  float origin_lng = 7;
+  float dest_lat = 8;
+  float dest_lng = 9;
+  float distance = 10;
+  float amount = 11;
+  int64 rider_id = 12;
+  string created_at = 13;
+  string updated_at = 14;
+}

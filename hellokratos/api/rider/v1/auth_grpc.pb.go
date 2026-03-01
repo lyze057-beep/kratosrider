@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.4.0
 // - protoc             v3.19.4
-// source: api/rider/v1/auth.proto
+// source: rider/v1/auth.proto
 
 package v1
 
@@ -19,10 +19,13 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	Auth_LoginByPhone_FullMethodName    = "/rider.v1.Auth/LoginByPhone"
-	Auth_LoginByPassword_FullMethodName = "/rider.v1.Auth/LoginByPassword"
-	Auth_Logout_FullMethodName          = "/rider.v1.Auth/Logout"
-	Auth_RefreshToken_FullMethodName    = "/rider.v1.Auth/RefreshToken"
+	Auth_Register_FullMethodName          = "/api.rider.v1.Auth/Register"
+	Auth_LoginByThirdParty_FullMethodName = "/api.rider.v1.Auth/LoginByThirdParty"
+	Auth_SendCode_FullMethodName          = "/api.rider.v1.Auth/SendCode"
+	Auth_LoginByPhone_FullMethodName      = "/api.rider.v1.Auth/LoginByPhone"
+	Auth_LoginByPassword_FullMethodName   = "/api.rider.v1.Auth/LoginByPassword"
+	Auth_Logout_FullMethodName            = "/api.rider.v1.Auth/Logout"
+	Auth_RefreshToken_FullMethodName      = "/api.rider.v1.Auth/RefreshToken"
 )
 
 // AuthClient is the client API for Auth service.
@@ -31,6 +34,12 @@ const (
 //
 // 骑手认证服务
 type AuthClient interface {
+	// 注册
+	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*LoginReply, error)
+	// 第三方登录
+	LoginByThirdParty(ctx context.Context, in *LoginByThirdPartyRequest, opts ...grpc.CallOption) (*LoginReply, error)
+	// 发送验证码
+	SendCode(ctx context.Context, in *SendCodeRequest, opts ...grpc.CallOption) (*SendCodeReply, error)
 	// 手机号+验证码登录
 	LoginByPhone(ctx context.Context, in *LoginByPhoneRequest, opts ...grpc.CallOption) (*LoginReply, error)
 	// 密码登录
@@ -47,6 +56,36 @@ type authClient struct {
 
 func NewAuthClient(cc grpc.ClientConnInterface) AuthClient {
 	return &authClient{cc}
+}
+
+func (c *authClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*LoginReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LoginReply)
+	err := c.cc.Invoke(ctx, Auth_Register_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) LoginByThirdParty(ctx context.Context, in *LoginByThirdPartyRequest, opts ...grpc.CallOption) (*LoginReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LoginReply)
+	err := c.cc.Invoke(ctx, Auth_LoginByThirdParty_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) SendCode(ctx context.Context, in *SendCodeRequest, opts ...grpc.CallOption) (*SendCodeReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SendCodeReply)
+	err := c.cc.Invoke(ctx, Auth_SendCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *authClient) LoginByPhone(ctx context.Context, in *LoginByPhoneRequest, opts ...grpc.CallOption) (*LoginReply, error) {
@@ -95,6 +134,12 @@ func (c *authClient) RefreshToken(ctx context.Context, in *RefreshTokenRequest, 
 //
 // 骑手认证服务
 type AuthServer interface {
+	// 注册
+	Register(context.Context, *RegisterRequest) (*LoginReply, error)
+	// 第三方登录
+	LoginByThirdParty(context.Context, *LoginByThirdPartyRequest) (*LoginReply, error)
+	// 发送验证码
+	SendCode(context.Context, *SendCodeRequest) (*SendCodeReply, error)
 	// 手机号+验证码登录
 	LoginByPhone(context.Context, *LoginByPhoneRequest) (*LoginReply, error)
 	// 密码登录
@@ -110,6 +155,15 @@ type AuthServer interface {
 type UnimplementedAuthServer struct {
 }
 
+func (UnimplementedAuthServer) Register(context.Context, *RegisterRequest) (*LoginReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+}
+func (UnimplementedAuthServer) LoginByThirdParty(context.Context, *LoginByThirdPartyRequest) (*LoginReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LoginByThirdParty not implemented")
+}
+func (UnimplementedAuthServer) SendCode(context.Context, *SendCodeRequest) (*SendCodeReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendCode not implemented")
+}
 func (UnimplementedAuthServer) LoginByPhone(context.Context, *LoginByPhoneRequest) (*LoginReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LoginByPhone not implemented")
 }
@@ -133,6 +187,60 @@ type UnsafeAuthServer interface {
 
 func RegisterAuthServer(s grpc.ServiceRegistrar, srv AuthServer) {
 	s.RegisterService(&Auth_ServiceDesc, srv)
+}
+
+func _Auth_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RegisterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).Register(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_Register_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).Register(ctx, req.(*RegisterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_LoginByThirdParty_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginByThirdPartyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).LoginByThirdParty(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_LoginByThirdParty_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).LoginByThirdParty(ctx, req.(*LoginByThirdPartyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auth_SendCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServer).SendCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auth_SendCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServer).SendCode(ctx, req.(*SendCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Auth_LoginByPhone_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -211,9 +319,21 @@ func _Auth_RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(i
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Auth_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "rider.v1.Auth",
+	ServiceName: "api.rider.v1.Auth",
 	HandlerType: (*AuthServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Register",
+			Handler:    _Auth_Register_Handler,
+		},
+		{
+			MethodName: "LoginByThirdParty",
+			Handler:    _Auth_LoginByThirdParty_Handler,
+		},
+		{
+			MethodName: "SendCode",
+			Handler:    _Auth_SendCode_Handler,
+		},
 		{
 			MethodName: "LoginByPhone",
 			Handler:    _Auth_LoginByPhone_Handler,
@@ -232,5 +352,5 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/rider/v1/auth.proto",
+	Metadata: "rider/v1/auth.proto",
 }

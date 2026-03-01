@@ -10,12 +10,39 @@ option java_package = "rider.v1";
 option objc_class_prefix = "APIHelloworldV1";
 
 enum ErrorReason {
-  option (errors.default_code)=500;
+  option (errors.default_code) = 500;
 
-  GREETER_UNSPECIFIED = 0;
-  USER_NOT_FOUND = 1 [(errors.code) = 404];
-  INVALID_PHONE_OR_CODE = 2 [(errors.code) = 400];
-  INVALID_PASSWORD = 3 [(errors.code) = 400];
-  TOKEN_EXPIRED = 4 [(errors.code) = 401];
-  LOGOUT_FAILED = 5 [(errors.code) = 500];
+  // 认证相关错误
+  USER_NOT_FOUND = 0 [(errors.code) = 404];
+  INVALID_PASSWORD = 1 [(errors.code) = 401];
+  INVALID_CODE = 2 [(errors.code) = 401];
+  CODE_EXPIRED = 3 [(errors.code) = 401];
+  SEND_CODE_FAILED = 4 [(errors.code) = 500];
+  TOKEN_EXPIRED = 5 [(errors.code) = 401];
+  TOKEN_INVALID = 6 [(errors.code) = 401];
+  
+  // 订单相关错误
+  ORDER_NOT_FOUND = 7 [(errors.code) = 404];
+  ORDER_STATUS_ERROR = 8 [(errors.code) = 400];
+  ORDER_ACCEPT_FAILED = 9 [(errors.code) = 400];
+  ORDER_DELIVER_FAILED = 10 [(errors.code) = 400];
+  ORDER_COMPLETE_FAILED = 11 [(errors.code) = 400];
+  ORDER_CANCEL_FAILED = 12 [(errors.code) = 400];
+  
+  // 消息相关错误
+  MESSAGE_SEND_FAILED = 13 [(errors.code) = 500];
+  MESSAGE_NOT_FOUND = 14 [(errors.code) = 404];
+  
+  // 收入相关错误
+  INCOME_NOT_FOUND = 15 [(errors.code) = 404];
+  WITHDRAWAL_APPLY_FAILED = 16 [(errors.code) = 400];
+  INSUFFICIENT_BALANCE = 17 [(errors.code) = 400];
+  
+  // 第三方登录相关错误
+  THIRD_PARTY_LOGIN_FAILED = 18 [(errors.code) = 401];
+  THIRD_PARTY_PLATFORM_ERROR = 19 [(errors.code) = 500];
+  
+  // 系统错误
+  INTERNAL_SERVER_ERROR = 20 [(errors.code) = 500];
+  PARAMETER_ERROR = 21 [(errors.code) = 400];
 }
