@@ -13,7 +13,7 @@ import (
 )
 
 // ProviderSet 数据层依赖注入集合
-var ProviderSet = wire.NewSet(NewData, NewGreeterRepo, NewAuthRepo, NewOrderRepo, NewMessageRepo, NewIncomeRepo, NewWithdrawalRepo, NewRedisClient, NewHywxSMS)
+var ProviderSet = wire.NewSet(NewData, NewGreeterRepo, NewAuthRepo, NewOrderRepo, NewMessageRepo, NewGroupRepo, NewIncomeRepo, NewWithdrawalRepo, NewAIAgentRepo, NewQualificationRepo, NewRedisClient, NewHywxSMS)
 
 // Data 数据层结构体，包含数据库、Redis和RabbitMQ连接
 

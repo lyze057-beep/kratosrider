@@ -26,6 +26,15 @@ func AutoMigrate(db *gorm.DB) error {
 		&model.GroupMessage{},
 		&model.Income{},
 		&model.Withdrawal{},
+		// 新增：AI智能体客服模块
+		&model.AIAgentMessage{},
+		&model.AIAgentFAQ{},
+		&model.AIAgentSession{},
+		// 新增：骑手资质验证模块
+		&model.RiderQualification{},
+		&model.IDCardVerification{},
+		&model.DriverLicenseVerification{},
+		&model.HealthCertificateVerification{},
 	)
 	if err != nil {
 		return err

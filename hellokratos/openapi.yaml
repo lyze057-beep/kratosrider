@@ -25,6 +25,116 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/helloworld.v1.HelloReply'
+    /rider/v1/ai-agent/faq:
+        get:
+            tags:
+                - AIAgent
+            description: 获取常见问题列表
+            operationId: AIAgent_GetFAQList
+            parameters:
+                - name: category
+                  in: query
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.AIAgentGetFAQListReply'
+    /rider/v1/ai-agent/history:
+        get:
+            tags:
+                - AIAgent
+            description: 获取聊天历史
+            operationId: AIAgent_GetChatHistory
+            parameters:
+                - name: riderId
+                  in: query
+                  schema:
+                    type: string
+                - name: lastMessageId
+                  in: query
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.AIAgentGetChatHistoryReply'
+    /rider/v1/ai-agent/rate:
+        post:
+            tags:
+                - AIAgent
+            description: 评价客服服务
+            operationId: AIAgent_RateService
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.AIAgentRateServiceRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.AIAgentRateServiceReply'
+    /rider/v1/ai-agent/send:
+        post:
+            tags:
+                - AIAgent
+            description: 发送消息给AI客服
+            operationId: AIAgent_SendMessage
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.AIAgentSendMessageRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.AIAgentSendMessageReply'
+    /rider/v1/ai-agent/suggestions:
+        get:
+            tags:
+                - AIAgent
+            description: 获取智能推荐问题
+            operationId: AIAgent_GetSuggestedQuestions
+            parameters:
+                - name: riderId
+                  in: query
+                  schema:
+                    type: string
+                - name: context
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.AIAgentGetSuggestedQuestionsReply'
     /rider/v1/code/send:
         post:
             tags:
@@ -44,6 +154,155 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.rider.v1.SendCodeReply'
+    /rider/v1/group/create:
+        post:
+            tags:
+                - Message
+            description: 创建群组
+            operationId: Message_CreateGroup
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.CreateGroupRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.CreateGroupReply'
+    /rider/v1/group/join:
+        post:
+            tags:
+                - Message
+            description: 加入群组
+            operationId: Message_JoinGroup
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.JoinGroupRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.JoinGroupReply'
+    /rider/v1/group/leave:
+        post:
+            tags:
+                - Message
+            description: 退出群组
+            operationId: Message_LeaveGroup
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.LeaveGroupRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.LeaveGroupReply'
+    /rider/v1/group/members:
+        get:
+            tags:
+                - Message
+            description: 获取群组成员列表
+            operationId: Message_GetGroupMembers
+            parameters:
+                - name: groupId
+                  in: query
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetGroupMembersReply'
+    /rider/v1/group/message/send:
+        post:
+            tags:
+                - Message
+            description: 发送群聊消息
+            operationId: Message_SendGroupMessage
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.SendGroupMessageRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.SendGroupMessageReply'
+    /rider/v1/group/messages:
+        get:
+            tags:
+                - Message
+            description: 获取群聊消息列表
+            operationId: Message_GetGroupMessageList
+            parameters:
+                - name: groupId
+                  in: query
+                  schema:
+                    type: string
+                - name: lastId
+                  in: query
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetGroupMessageListReply'
+    /rider/v1/groups:
+        get:
+            tags:
+                - Message
+            description: 获取群组列表
+            operationId: Message_GetGroupList
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: limit
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetGroupListReply'
     /rider/v1/income/create:
         post:
             tags:
@@ -364,6 +623,141 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.rider.v1.GetOrderListReply'
+    /rider/v1/qualification/detail:
+        get:
+            tags:
+                - Qualification
+            description: 获取验证详情
+            operationId: Qualification_GetVerificationDetail
+            parameters:
+                - name: riderId
+                  in: query
+                  schema:
+                    type: string
+                - name: itemType
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetVerificationDetailReply'
+    /rider/v1/qualification/driver-license:
+        post:
+            tags:
+                - Qualification
+            description: 提交驾驶证信息
+            operationId: Qualification_SubmitDriverLicense
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.SubmitDriverLicenseRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.SubmitDriverLicenseReply'
+    /rider/v1/qualification/health:
+        post:
+            tags:
+                - Qualification
+            description: 提交健康证信息
+            operationId: Qualification_SubmitHealthCertificate
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.SubmitHealthCertificateRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.SubmitHealthCertificateReply'
+    /rider/v1/qualification/idcard:
+        post:
+            tags:
+                - Qualification
+            description: 提交身份证信息
+            operationId: Qualification_SubmitIDCard
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.SubmitIDCardRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.SubmitIDCardReply'
+    /rider/v1/qualification/resubmit:
+        post:
+            tags:
+                - Qualification
+            description: 重新提交验证材料
+            operationId: Qualification_ResubmitVerification
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.ResubmitVerificationRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.ResubmitVerificationReply'
+    /rider/v1/qualification/status:
+        get:
+            tags:
+                - Qualification
+            description: 获取验证状态
+            operationId: Qualification_GetVerificationStatus
+            parameters:
+                - name: riderId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetVerificationStatusReply'
+    /rider/v1/qualification/verify:
+        post:
+            tags:
+                - Qualification
+            description: 审核验证（管理员接口）
+            operationId: Qualification_VerifyQualification
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.VerifyQualificationRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.VerifyQualificationReply'
     /rider/v1/register:
         post:
             tags:
@@ -465,6 +859,132 @@ paths:
                                 $ref: '#/components/schemas/api.rider.v1.GetWithdrawalListReply'
 components:
     schemas:
+        api.rider.v1.AIAction:
+            type: object
+            properties:
+                actionType:
+                    type: string
+                actionName:
+                    type: string
+                actionParams:
+                    type: string
+            description: 可执行操作
+        api.rider.v1.AIAgentChatMessage:
+            type: object
+            properties:
+                id:
+                    type: string
+                riderId:
+                    type: string
+                content:
+                    type: string
+                messageType:
+                    type: integer
+                    format: int32
+                contentType:
+                    type: integer
+                    format: int32
+                createdAt:
+                    type: string
+            description: 聊天消息
+        api.rider.v1.AIAgentFAQItem:
+            type: object
+            properties:
+                id:
+                    type: string
+                question:
+                    type: string
+                answer:
+                    type: string
+                category:
+                    type: string
+                viewCount:
+                    type: integer
+                    format: int32
+            description: 常见问题项
+        api.rider.v1.AIAgentGetChatHistoryReply:
+            type: object
+            properties:
+                messages:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.rider.v1.AIAgentChatMessage'
+                hasMore:
+                    type: boolean
+            description: 获取聊天历史响应
+        api.rider.v1.AIAgentGetFAQListReply:
+            type: object
+            properties:
+                faqs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.rider.v1.AIAgentFAQItem'
+            description: 获取常见问题列表响应
+        api.rider.v1.AIAgentGetSuggestedQuestionsReply:
+            type: object
+            properties:
+                questions:
+                    type: array
+                    items:
+                        type: string
+            description: 获取智能推荐问题响应
+        api.rider.v1.AIAgentRateServiceReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+            description: 评价客服服务响应
+        api.rider.v1.AIAgentRateServiceRequest:
+            type: object
+            properties:
+                riderId:
+                    type: string
+                sessionId:
+                    type: string
+                rating:
+                    type: integer
+                    format: int32
+                feedback:
+                    type: string
+            description: 评价客服服务请求
+        api.rider.v1.AIAgentSendMessageReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+                aiResponse:
+                    $ref: '#/components/schemas/api.rider.v1.AIResponse'
+            description: 发送消息响应
+        api.rider.v1.AIAgentSendMessageRequest:
+            type: object
+            properties:
+                riderId:
+                    type: string
+                content:
+                    type: string
+                messageType:
+                    type: integer
+                    format: int32
+            description: 发送消息请求
+        api.rider.v1.AIResponse:
+            type: object
+            properties:
+                content:
+                    type: string
+                responseType:
+                    type: integer
+                    format: int32
+                actions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.rider.v1.AIAction'
+                createdAt:
+                    type: string
+            description: AI响应
         api.rider.v1.AcceptOrderReply:
             type: object
             properties:
@@ -504,6 +1024,30 @@ components:
                 account:
                     type: string
             description: 申请提现请求
+        api.rider.v1.CreateGroupReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+                group:
+                    $ref: '#/components/schemas/api.rider.v1.GroupInfo'
+            description: 创建群组响应
+        api.rider.v1.CreateGroupRequest:
+            type: object
+            properties:
+                creatorId:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                memberIds:
+                    type: array
+                    items:
+                        type: string
+            description: 创建群组请求
         api.rider.v1.CreateIncomeReply:
             type: object
             properties:
@@ -565,6 +1109,39 @@ components:
                     type: number
                     format: float
             description: 创建订单请求
+        api.rider.v1.GetGroupListReply:
+            type: object
+            properties:
+                groups:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.rider.v1.GroupInfo'
+                total:
+                    type: integer
+                    format: int32
+            description: 获取群组列表响应
+        api.rider.v1.GetGroupMembersReply:
+            type: object
+            properties:
+                members:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.rider.v1.GroupMemberInfo'
+                total:
+                    type: integer
+                    format: int32
+            description: 获取群组成员列表响应
+        api.rider.v1.GetGroupMessageListReply:
+            type: object
+            properties:
+                messages:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.rider.v1.GroupMessageInfo'
+                total:
+                    type: integer
+                    format: int32
+            description: 获取群聊消息列表响应
         api.rider.v1.GetIncomeListReply:
             type: object
             properties:
@@ -623,6 +1200,22 @@ components:
                 count:
                     type: string
             description: 获取未读消息数量响应
+        api.rider.v1.GetVerificationDetailReply:
+            type: object
+            properties:
+                detail:
+                    $ref: '#/components/schemas/api.rider.v1.VerificationDetail'
+            description: 获取验证详情响应
+        api.rider.v1.GetVerificationStatusReply:
+            type: object
+            properties:
+                overallStatus:
+                    $ref: '#/components/schemas/api.rider.v1.OverallStatus'
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.rider.v1.VerificationItem'
+            description: 获取验证状态响应
         api.rider.v1.GetWithdrawalListReply:
             type: object
             properties:
@@ -634,6 +1227,55 @@ components:
                     type: integer
                     format: int32
             description: 获取提现列表响应
+        api.rider.v1.GroupInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                description:
+                    type: string
+                creatorId:
+                    type: string
+                memberCount:
+                    type: integer
+                    format: int32
+                createdAt:
+                    type: string
+            description: 群组信息
+        api.rider.v1.GroupMemberInfo:
+            type: object
+            properties:
+                userId:
+                    type: string
+                nickname:
+                    type: string
+                role:
+                    type: integer
+                    format: int32
+                joinedAt:
+                    type: string
+            description: 群组成员信息
+        api.rider.v1.GroupMessageInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                groupId:
+                    type: string
+                fromId:
+                    type: string
+                fromNickname:
+                    type: string
+                content:
+                    type: string
+                type:
+                    type: integer
+                    format: int32
+                createdAt:
+                    type: string
+            description: 群聊消息信息
         api.rider.v1.IncomeInfo:
             type: object
             properties:
@@ -655,6 +1297,38 @@ components:
                 createdAt:
                     type: string
             description: 收入信息
+        api.rider.v1.JoinGroupReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+            description: 加入群组响应
+        api.rider.v1.JoinGroupRequest:
+            type: object
+            properties:
+                userId:
+                    type: string
+                groupId:
+                    type: string
+            description: 加入群组请求
+        api.rider.v1.LeaveGroupReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+            description: 退出群组响应
+        api.rider.v1.LeaveGroupRequest:
+            type: object
+            properties:
+                userId:
+                    type: string
+                groupId:
+                    type: string
+            description: 退出群组请求
         api.rider.v1.LoginByPasswordRequest:
             type: object
             properties:
@@ -780,6 +1454,17 @@ components:
                 updatedAt:
                     type: string
             description: 订单信息
+        api.rider.v1.OverallStatus:
+            type: object
+            properties:
+                status:
+                    type: integer
+                    format: int32
+                statusText:
+                    type: string
+                message:
+                    type: string
+            description: 总体状态
         api.rider.v1.RefreshTokenRequest:
             type: object
             properties:
@@ -798,6 +1483,24 @@ components:
                 nickname:
                     type: string
             description: 注册请求
+        api.rider.v1.ResubmitVerificationReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+            description: 重新提交验证材料响应
+        api.rider.v1.ResubmitVerificationRequest:
+            type: object
+            properties:
+                riderId:
+                    type: string
+                itemType:
+                    type: string
+                reason:
+                    type: string
+            description: 重新提交验证材料请求
         api.rider.v1.SendCodeReply:
             type: object
             properties:
@@ -815,6 +1518,29 @@ components:
                 type:
                     type: string
             description: 短信发送请求
+        api.rider.v1.SendGroupMessageReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+                groupMessage:
+                    $ref: '#/components/schemas/api.rider.v1.GroupMessageInfo'
+            description: 发送群聊消息响应
+        api.rider.v1.SendGroupMessageRequest:
+            type: object
+            properties:
+                fromId:
+                    type: string
+                groupId:
+                    type: string
+                content:
+                    type: string
+                type:
+                    type: integer
+                    format: int32
+            description: 发送群聊消息请求
         api.rider.v1.SendMessageReply:
             type: object
             properties:
@@ -836,6 +1562,86 @@ components:
                     type: integer
                     format: int32
             description: 发送消息请求
+        api.rider.v1.SubmitDriverLicenseReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+                verificationId:
+                    type: string
+            description: 提交驾驶证信息响应
+        api.rider.v1.SubmitDriverLicenseRequest:
+            type: object
+            properties:
+                riderId:
+                    type: string
+                licenseNumber:
+                    type: string
+                licenseType:
+                    type: string
+                issueDate:
+                    type: string
+                expiryDate:
+                    type: string
+                licenseFront:
+                    type: string
+                licenseBack:
+                    type: string
+            description: 提交驾驶证信息请求
+        api.rider.v1.SubmitHealthCertificateReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+                verificationId:
+                    type: string
+            description: 提交健康证信息响应
+        api.rider.v1.SubmitHealthCertificateRequest:
+            type: object
+            properties:
+                riderId:
+                    type: string
+                certificateNumber:
+                    type: string
+                issueDate:
+                    type: string
+                expiryDate:
+                    type: string
+                certificateImage:
+                    type: string
+                hospitalName:
+                    type: string
+            description: 提交健康证信息请求
+        api.rider.v1.SubmitIDCardReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+                verificationId:
+                    type: string
+            description: 提交身份证信息响应
+        api.rider.v1.SubmitIDCardRequest:
+            type: object
+            properties:
+                riderId:
+                    type: string
+                realName:
+                    type: string
+                idCardNumber:
+                    type: string
+                idCardFront:
+                    type: string
+                idCardBack:
+                    type: string
+                idCardHandheld:
+                    type: string
+            description: 提交身份证信息请求
         api.rider.v1.UpdateOrderStatusReply:
             type: object
             properties:
@@ -887,6 +1693,84 @@ components:
                     type: integer
                     format: int32
             description: 用户信息
+        api.rider.v1.VerificationDetail:
+            type: object
+            properties:
+                id:
+                    type: string
+                riderId:
+                    type: string
+                itemType:
+                    type: string
+                itemName:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+                statusText:
+                    type: string
+                submitData:
+                    type: string
+                verifyResult:
+                    type: string
+                rejectReason:
+                    type: string
+                submitTime:
+                    type: string
+                verifyTime:
+                    type: string
+                createdAt:
+                    type: string
+                updatedAt:
+                    type: string
+            description: 验证详情
+        api.rider.v1.VerificationItem:
+            type: object
+            properties:
+                itemType:
+                    type: string
+                itemName:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+                statusText:
+                    type: string
+                submitTime:
+                    type: string
+                verifyTime:
+                    type: string
+                rejectReason:
+                    type: string
+                expiryDate:
+                    type: string
+                daysToExpiry:
+                    type: integer
+                    format: int32
+            description: 验证项
+        api.rider.v1.VerifyQualificationReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+            description: 审核验证响应（管理员接口）
+        api.rider.v1.VerifyQualificationRequest:
+            type: object
+            properties:
+                riderId:
+                    type: string
+                itemType:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+                rejectReason:
+                    type: string
+                verifyResult:
+                    type: string
+            description: 审核验证请求（管理员接口）
         api.rider.v1.WithdrawalInfo:
             type: object
             properties:
@@ -918,6 +1802,8 @@ components:
                     type: string
             description: The response message containing the greetings
 tags:
+    - name: AIAgent
+      description: AI智能体客服服务
     - name: Auth
       description: 骑手认证服务
     - name: Greeter
@@ -928,3 +1814,5 @@ tags:
       description: 消息服务
     - name: Order
       description: 订单服务
+    - name: Qualification
+      description: 骑手资质验证服务

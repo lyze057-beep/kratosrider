@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-http v2.9.2
 // - protoc             v3.19.4
-// source: api/rider/v1/message.proto
+// source: rider/v1/message.proto
 
 package v1
 
@@ -58,7 +58,7 @@ type MessageHTTPServer interface {
 
 func RegisterMessageHTTPServer(s *http.Server, srv MessageHTTPServer) {
 	r := s.Route("/")
-	r.POST("/rider/v1/message/send", _Message_SendMessage0_HTTP_Handler(srv))
+	r.POST("/rider/v1/message/send", _Message_SendMessage1_HTTP_Handler(srv))
 	r.GET("/rider/v1/messages", _Message_GetMessageList0_HTTP_Handler(srv))
 	r.GET("/rider/v1/messages/unread/count", _Message_GetUnreadMessageCount0_HTTP_Handler(srv))
 	r.POST("/rider/v1/message/read", _Message_MarkMessageAsRead0_HTTP_Handler(srv))
@@ -71,7 +71,7 @@ func RegisterMessageHTTPServer(s *http.Server, srv MessageHTTPServer) {
 	r.GET("/rider/v1/group/messages", _Message_GetGroupMessageList0_HTTP_Handler(srv))
 }
 
-func _Message_SendMessage0_HTTP_Handler(srv MessageHTTPServer) func(ctx http.Context) error {
+func _Message_SendMessage1_HTTP_Handler(srv MessageHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in SendMessageRequest
 		if err := ctx.Bind(&in); err != nil {

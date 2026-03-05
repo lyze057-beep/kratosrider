@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.4.0
 // - protoc             v3.19.4
-// source: api/rider/v1/message.proto
+// source: rider/v1/message.proto
 
 package v1
 
@@ -647,5 +647,5 @@ var Message_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "api/rider/v1/message.proto",
+	Metadata: "rider/v1/message.proto",
 }

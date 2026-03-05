@@ -1,0 +1,206 @@
+syntax = "proto3";
+
+package api.rider.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "hellokratos/api/rider/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.api.helloworld.v1";
+option java_outer_classname = "HelloworldProtoV1";
+
+// 骑手资质验证服务
+service Qualification {
+  // 提交身份证信息
+  rpc SubmitIDCard (SubmitIDCardRequest) returns (SubmitIDCardReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/qualification/idcard"
+      body: "*"
+    };
+  }
+
+  // 提交驾驶证信息
+  rpc SubmitDriverLicense (SubmitDriverLicenseRequest) returns (SubmitDriverLicenseReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/qualification/driver-license"
+      body: "*"
+    };
+  }
+
+  // 提交健康证信息
+  rpc SubmitHealthCertificate (SubmitHealthCertificateRequest) returns (SubmitHealthCertificateReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/qualification/health"
+      body: "*"
+    };
+  }
+
+  // 获取验证状态
+  rpc GetVerificationStatus (GetVerificationStatusRequest) returns (GetVerificationStatusReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/qualification/status"
+    };
+  }
+
+  // 获取验证详情
+  rpc GetVerificationDetail (GetVerificationDetailRequest) returns (GetVerificationDetailReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/qualification/detail"
+    };
+  }
+
+  // 重新提交验证材料
+  rpc ResubmitVerification (ResubmitVerificationRequest) returns (ResubmitVerificationReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/qualification/resubmit"
+      body: "*"
+    };
+  }
+
+  // 审核验证（管理员接口）
+  rpc VerifyQualification (VerifyQualificationRequest) returns (VerifyQualificationReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/qualification/verify"
+      body: "*"
+    };
+  }
+}
+
+// 提交身份证信息请求
+message SubmitIDCardRequest {
+  int64 rider_id = 1;
+  string real_name = 2; // 真实姓名
+  string id_card_number = 3; // 身份证号
+  string id_card_front = 4; // 身份证正面照片URL
+  string id_card_back = 5; // 身份证反面照片URL
+  string id_card_handheld = 6; // 手持身份证照片URL
+}
+
+// 提交身份证信息响应
+message SubmitIDCardReply {
+  bool success = 1;
+  string message = 2;
+  int64 verification_id = 3;
+}
+
+// 提交驾驶证信息请求
+message SubmitDriverLicenseRequest {
+  int64 rider_id = 1;
+  string license_number = 2; // 驾驶证号
+  string license_type = 3; // 准驾车型：C1, C2, D, E等
+  string issue_date = 4; // 初次领证日期
+  string expiry_date = 5; // 有效期至
+  string license_front = 6; // 驾驶证正面照片URL
+  string license_back = 7; // 驾驶证反面照片URL
+}
+
+// 提交驾驶证信息响应
+message SubmitDriverLicenseReply {
+  bool success = 1;
+  string message = 2;
+  int64 verification_id = 3;
+}
+
+// 提交健康证信息请求
+message SubmitHealthCertificateRequest {
+  int64 rider_id = 1;
+  string certificate_number = 2; // 健康证号
+  string issue_date = 3; // 发证日期
+  string expiry_date = 4; // 有效期至
+  string certificate_image = 5; // 健康证照片URL
+  string hospital_name = 6; // 体检医院名称
+}
+
+// 提交健康证信息响应
+message SubmitHealthCertificateReply {
+  bool success = 1;
+  string message = 2;
+  int64 verification_id = 3;
+}
+
+// 获取验证状态请求
+message GetVerificationStatusRequest {
+  int64 rider_id = 1;
+}
+
+// 获取验证状态响应
+message GetVerificationStatusReply {
+  OverallStatus overall_status = 1; // 总体状态
+  repeated VerificationItem items = 2; // 各项验证状态
+}
+
+// 总体状态
+message OverallStatus {
+  int32 status = 1; // 0-未认证 1-认证中 2-认证通过 3-认证失败
+  string status_text = 2;
+  string message = 3; // 提示信息
+}
+
+// 验证项
+message VerificationItem {
+  string item_type = 1; // idcard-身份证 driver_license-驾驶证 health_certificate-健康证
+  string item_name = 2;
+  int32 status = 3; // 0-未提交 1-审核中 2-已通过 3-已拒绝
+  string status_text = 4;
+  string submit_time = 5;
+  string verify_time = 6;
+  string reject_reason = 7; // 拒绝原因
+  string expiry_date = 8; // 证件有效期
+  int32 days_to_expiry = 9; // 距离过期天数
+}
+
+// 获取验证详情请求
+message GetVerificationDetailRequest {
+  int64 rider_id = 1;
+  string item_type = 2; // idcard/driver_license/health_certificate
+}
+
+// 获取验证详情响应
+message GetVerificationDetailReply {
+  VerificationDetail detail = 1;
+}
+
+// 验证详情
+message VerificationDetail {
+  int64 id = 1;
+  int64 rider_id = 2;
+  string item_type = 3;
+  string item_name = 4;
+  int32 status = 5;
+  string status_text = 6;
+  string submit_data = 7; // 提交的原始数据(JSON)
+  string verify_result = 8; // 审核结果
+  string reject_reason = 9;
+  string submit_time = 10;
+  string verify_time = 11;
+  string created_at = 12;
+  string updated_at = 13;
+}
+
+// 重新提交验证材料请求
+message ResubmitVerificationRequest {
+  int64 rider_id = 1;
+  string item_type = 2; // 重新提交的类型
+  string reason = 3; // 重新提交原因
+}
+
+// 重新提交验证材料响应
+message ResubmitVerificationReply {
+  bool success = 1;
+  string message = 2;
+}
+
+// 审核验证请求（管理员接口）
+message VerifyQualificationRequest {
+  int64 rider_id = 1; // 骑手ID
+  string item_type = 2; // 验证项目类型：idcard-身份证, driver_license-驾驶证, health_certificate-健康证
+  int32 status = 3; // 审核状态：2-通过, 3-拒绝
+  string reject_reason = 4; // 拒绝原因（仅当status=2时必填）
+  string verify_result = 5; // 审核结果说明
+}
+
+// 审核验证响应（管理员接口）
+message VerifyQualificationReply {
+  bool success = 1;
+  string message = 2;
+}

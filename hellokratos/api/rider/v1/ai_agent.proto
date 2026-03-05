@@ -1,0 +1,147 @@
+syntax = "proto3";
+
+package api.rider.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "hellokratos/api/rider/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.api.helloworld.v1";
+option java_outer_classname = "HelloworldProtoV1";
+
+// AI智能体客服服务
+service AIAgent {
+  // 发送消息给AI客服
+  rpc SendMessage (AIAgentSendMessageRequest) returns (AIAgentSendMessageReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/ai-agent/send"
+      body: "*"
+    };
+  }
+
+  // 获取聊天历史
+  rpc GetChatHistory (AIAgentGetChatHistoryRequest) returns (AIAgentGetChatHistoryReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/ai-agent/history"
+    };
+  }
+
+  // 获取常见问题列表
+  rpc GetFAQList (AIAgentGetFAQListRequest) returns (AIAgentGetFAQListReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/ai-agent/faq"
+    };
+  }
+
+  // 评价客服服务
+  rpc RateService (AIAgentRateServiceRequest) returns (AIAgentRateServiceReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/ai-agent/rate"
+      body: "*"
+    };
+  }
+
+  // 获取智能推荐问题
+  rpc GetSuggestedQuestions (AIAgentGetSuggestedQuestionsRequest) returns (AIAgentGetSuggestedQuestionsReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/ai-agent/suggestions"
+    };
+  }
+}
+
+// 发送消息请求
+message AIAgentSendMessageRequest {
+  int64 rider_id = 1;
+  string content = 2;
+  int32 message_type = 3; // 0-文本 1-图片 2-语音
+}
+
+// 发送消息响应
+message AIAgentSendMessageReply {
+  bool success = 1;
+  string message = 2;
+  AIResponse ai_response = 3;
+}
+
+// AI响应
+message AIResponse {
+  string content = 1;
+  int32 response_type = 2; // 0-文本回复 1-订单查询结果 2-收入查询结果 3-操作指引 4-转人工
+  repeated AIAction actions = 3; // 可执行操作
+  string created_at = 4;
+}
+
+// 可执行操作
+message AIAction {
+  string action_type = 1; // 操作类型：view_order, view_income, contact_human等
+  string action_name = 2; // 操作名称
+  string action_params = 3; // 操作参数(JSON格式)
+}
+
+// 获取聊天历史请求
+message AIAgentGetChatHistoryRequest {
+  int64 rider_id = 1;
+  int64 last_message_id = 2; // 最后一条消息ID，用于分页
+  int32 limit = 3;
+}
+
+// 获取聊天历史响应
+message AIAgentGetChatHistoryReply {
+  repeated AIAgentChatMessage messages = 1;
+  bool has_more = 2;
+}
+
+// 聊天消息
+message AIAgentChatMessage {
+  int64 id = 1;
+  int64 rider_id = 2;
+  string content = 3;
+  int32 message_type = 4; // 0-用户消息 1-AI回复
+  int32 content_type = 5; // 0-文本 1-图片 2-语音
+  string created_at = 6;
+}
+
+// 获取常见问题列表请求
+message AIAgentGetFAQListRequest {
+  string category = 1; // 分类：order-订单 income-收入 rule-规则 other-其他
+  int32 limit = 2;
+}
+
+// 获取常见问题列表响应
+message AIAgentGetFAQListReply {
+  repeated AIAgentFAQItem faqs = 1;
+}
+
+// 常见问题项
+message AIAgentFAQItem {
+  int64 id = 1;
+  string question = 2;
+  string answer = 3;
+  string category = 4;
+  int32 view_count = 5; // 查看次数
+}
+
+// 评价客服服务请求
+message AIAgentRateServiceRequest {
+  int64 rider_id = 1;
+  int64 session_id = 2; // 会话ID
+  int32 rating = 3; // 评分：1-5星
+  string feedback = 4; // 反馈意见
+}
+
+// 评价客服服务响应
+message AIAgentRateServiceReply {
+  bool success = 1;
+  string message = 2;
+}
+
+// 获取智能推荐问题请求
+message AIAgentGetSuggestedQuestionsRequest {
+  int64 rider_id = 1;
+  string context = 2; // 上下文：如当前页面(order,income,profile等)
+}
+
+// 获取智能推荐问题响应
+message AIAgentGetSuggestedQuestionsReply {
+  repeated string questions = 1;
+}
