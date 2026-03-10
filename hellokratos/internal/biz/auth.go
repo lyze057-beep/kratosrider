@@ -22,7 +22,7 @@ import (
 // AuthUsecase 认证相关的业务逻辑接口
 type AuthUsecase interface {
 	// SendCode 发送验证码
-	SendCode(ctx context.Context, phone string, codeType string) (string, int32, error)
+	SendCode(ctx context.Context, phone string, codeType string) (string, string, int32, error)
 	// Register 注册
 	Register(ctx context.Context, phone string, password string, code string, nickname string) (*model.User, string, string, int64, error)
 	// LoginByPhone 手机号+验证码登录
@@ -70,7 +70,7 @@ func NewAuthUsecase(authRepo data.AuthRepo, rdb *redis.Client, sms *sms.HywxSMS,
 }
 
 // SendCode 发送验证码
-func (uc *authUsecase) SendCode(ctx context.Context, phone string, codeType string) (string, int32, error) {
+func (uc *authUsecase) SendCode(ctx context.Context, phone string, codeType string) (string, string, int32, error) {
 	// 生成6位验证码
 	code := generateCode(6)
 	// 验证码有效期5分钟
@@ -81,7 +81,7 @@ func (uc *authUsecase) SendCode(ctx context.Context, phone string, codeType stri
 	err := uc.rdb.Set(ctx, key, code, time.Duration(expireSeconds)*time.Second).Err()
 	if err != nil {
 		uc.log.Error("failed to store code", "err", err)
-		return "", 0, err
+		return "", "", 0, err
 	}
 	// 验证是否存储成功
 	storedCode, err := uc.rdb.Get(ctx, key).Result()
@@ -105,7 +105,7 @@ func (uc *authUsecase) SendCode(ctx context.Context, phone string, codeType stri
 	*/
 	// 注释掉短信发送代码，仅用于测试
 	uc.log.Info("send code (sms disabled for testing)", "phone", phone, "code", code)
-	return code, expireSeconds, nil
+	return "dummy_request_id", code, expireSeconds, nil
 }
 
 // Register 注册

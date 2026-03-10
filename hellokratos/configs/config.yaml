@@ -1,10 +1,10 @@
 server:
   http:
-    addr: 0.0.0.0:8000
-    timeout: 1s
+    addr: "0.0.0.0:8000"  # 使用IPv4地址，允许外部访问
+    timeout: 10s
   grpc:
-    addr: 0.0.0.0:9000
-    timeout: 1s
+    addr: "0.0.0.0:9001"  # 使用IPv4地址
+    timeout: 10s
 data:
   database:
     driver: mysql
@@ -25,3 +25,14 @@ data:
   sms:
     api_id: "C35443821"
     api_key: "92e454aa423a2125be6a3cba3380fff9"
+  ai_service:
+    ocr_access_key: "AKLTYjU0ZDVhZGQ3YmMxNGFiM2FhNWM5NjJkMjVmZGU0OW0"
+    ocr_secret_key: "TlRSaE1UWTNaREpqTTJaa05EWTROV0V5TW1abFltTXlZMkZtWm1JeU56SQ=="
+    asr_app_id: "7534438675"
+    asr_token: "UvZp0mLFMqMo-ZxuuHRA3OEqXrEj-QN3"
+    llm_api_key: "8da511bc-ae85-4115-a2bf-3f6c92df6311"
+    llm_base_url: "https://ark.cn-beijing.volces.com/api/v3"
+    llm_model: "ep-20260305103755-hbsrm"
+    embedding_api_key: "8da511bc-ae85-4115-a2bf-3f6c92df6311"
+    embedding_base_url: "https://ark.cn-beijing.volces.com/api/v3"
+    embedding_model: "ep-20260305113418-54jks"

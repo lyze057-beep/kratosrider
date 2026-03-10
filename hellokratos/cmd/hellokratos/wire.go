@@ -8,6 +8,7 @@ package main
 import (
 	"context"
 	"hellokratos/internal/biz"
+	"hellokratos/internal/biz/ai"
 	"hellokratos/internal/conf"
 	"hellokratos/internal/data"
 	"hellokratos/internal/server"
@@ -34,6 +35,8 @@ func wireApp(serverConfig *conf.Server, dataConfig *conf.Data, logger log.Logger
 	// 新增：AI智能体客服和资质验证模块
 	aiAgentRepo := data.NewAIAgentRepo(dataInstance)
 	qualificationRepo := data.NewQualificationRepo(dataInstance)
+	// 新增：骑手拉新模块
+	referralRepo := data.NewReferralRepo(dataInstance)
 	redisClient := data.NewRedisClient(dataConfig)
 	smsClient := data.NewHywxSMS(dataConfig)
 	orderMessageProducer := data.NewOrderMessageProducer(dataInstance, logger)
@@ -46,8 +49,46 @@ func wireApp(serverConfig *conf.Server, dataConfig *conf.Data, logger log.Logger
 	groupUsecase := biz.NewGroupUsecase(groupRepo, redisClient, logger)
 	incomeUsecase := biz.NewIncomeUsecase(incomeRepo, withdrawalRepo, orderRepo, redisClient, logger)
 	// 新增：AI智能体客服和资质验证模块
-	aiAgentUsecase := biz.NewAIAgentUsecase(aiAgentRepo, orderRepo, incomeRepo, logger)
+	embeddingService := biz.NewEmbeddingService()
+	vectorDBService := biz.NewVectorDBService(embeddingService)
+	llmService := biz.NewLLMService()
+	ocrService := ai.NewOCRService(dataConfig)
+	asrService := ai.NewASRService(dataConfig)
+
+	// 初始化AI服务
+	ctx := context.Background()
+	if err := embeddingService.Init(ctx, dataConfig); err != nil {
+		logger.Log(log.LevelWarn, "failed to init embedding service", "err", err)
+	}
+	if err := vectorDBService.Init(ctx, dataConfig); err != nil {
+		logger.Log(log.LevelWarn, "failed to init vectorDB service", "err", err)
+	}
+	if err := llmService.Init(ctx, dataConfig); err != nil {
+		logger.Log(log.LevelWarn, "failed to init LLM service", "err", err)
+	}
+
+	// 初始化 Skill Manager 和 Skills
+	skillManager := biz.NewSkillManager(llmService, logger)
+
+	// 注册所有 Skills
+	orderSkill := ai.NewOrderSkill(orderRepo)
+	incomeSkill := ai.NewIncomeSkill(incomeRepo)
+	profileSkill := ai.NewProfileSkill(authRepo, qualificationRepo)
+	navigationSkill := ai.NewNavigationSkill(dataConfig)
+	weatherSkill := ai.NewWeatherSkill(dataConfig)
+	supportSkill := ai.NewSupportSkill()
+
+	skillManager.RegisterSkill(orderSkill)
+	skillManager.RegisterSkill(incomeSkill)
+	skillManager.RegisterSkill(profileSkill)
+	skillManager.RegisterSkill(navigationSkill)
+	skillManager.RegisterSkill(weatherSkill)
+	skillManager.RegisterSkill(supportSkill)
+
+	aiAgentUsecase := biz.NewAIAgentUsecase(aiAgentRepo, orderRepo, incomeRepo, vectorDBService, llmService, ocrService, asrService, skillManager, logger)
 	qualificationUsecase := biz.NewQualificationUsecase(qualificationRepo, logger)
+	// 新增：骑手拉新模块
+	referralUsecase := biz.NewReferralUsecase(referralRepo, logger, dataConfig)
 
 	greeterService := service.NewGreeterService(greeterUsecase)
 	authService := service.NewAuthService(authUsecase, logger)
@@ -57,9 +98,11 @@ func wireApp(serverConfig *conf.Server, dataConfig *conf.Data, logger log.Logger
 	// 新增：AI智能体客服和资质验证服务
 	aiAgentService := service.NewAIAgentService(aiAgentUsecase, logger)
 	qualificationService := service.NewQualificationService(qualificationUsecase, logger)
+	// 新增：骑手拉新服务
+	referralService := service.NewReferralService(referralUsecase)
 
-	grpcServer := server.NewGRPCServer(serverConfig, greeterService, authService, orderService, messageService, incomeService, aiAgentService, qualificationService, logger)
-	httpServer := server.NewHTTPServer(serverConfig, greeterService, authService, orderService, messageService, incomeService, aiAgentService, qualificationService, logger)
+	grpcServer := server.NewGRPCServer(serverConfig, greeterService, authService, orderService, messageService, incomeService, aiAgentService, qualificationService, referralService, logger)
+	httpServer := server.NewHTTPServer(serverConfig, greeterService, authService, orderService, messageService, incomeService, aiAgentService, qualificationService, referralService, logger)
 
 	// 启动订单消息消费者
 	if err := orderMessageConsumer.StartConsuming(context.Background()); err != nil {

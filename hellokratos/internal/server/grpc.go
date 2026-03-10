@@ -12,7 +12,7 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, authService *service.AuthService, orderService *service.OrderService, messageService *service.MessageService, incomeService *service.IncomeService, aiAgentService *service.AIAgentService, qualificationService *service.QualificationService, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, authService *service.AuthService, orderService *service.OrderService, messageService *service.MessageService, incomeService *service.IncomeService, aiAgentService *service.AIAgentService, qualificationService *service.QualificationService, referralService *service.ReferralService, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -36,5 +36,7 @@ func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, authService 
 	// 新增：AI智能体客服和资质验证服务
 	riderV1.RegisterAIAgentServer(srv, aiAgentService)
 	riderV1.RegisterQualificationServer(srv, qualificationService)
+	// 新增：骑手拉新服务
+	riderV1.RegisterReferralServer(srv, referralService)
 	return srv
 }

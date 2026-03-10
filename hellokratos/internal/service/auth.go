@@ -127,14 +127,15 @@ func (s *AuthService) RefreshToken(ctx context.Context, req *v1.RefreshTokenRequ
 
 // SendCode 发送验证码
 func (s *AuthService) SendCode(ctx context.Context, req *v1.SendCodeRequest) (*v1.SendCodeReply, error) {
-	_, expireSeconds, err := s.authUsecase.SendCode(ctx, req.Phone, req.Type)
+	requestId, code, expireSeconds, err := s.authUsecase.SendCode(ctx, req.Phone, req.Type)
 	if err != nil {
 		s.log.Error("send code failed", "err", err)
 		return nil, err
 	}
 	return &v1.SendCodeReply{
-		RequestId:     "dummy_request_id",
+		RequestId:     requestId,
 		ExpireSeconds: expireSeconds,
+		Code:          code,
 	}, nil
 }
 

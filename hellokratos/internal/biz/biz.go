@@ -1,6 +1,22 @@
 package biz
 
-import "github.com/google/wire"
+import (
+	"hellokratos/internal/biz/ai"
+	"github.com/google/wire"
+)
 
 // ProviderSet is biz providers.
-var ProviderSet = wire.NewSet(NewGreeterUsecase, NewAuthUsecase, NewOrderUsecase, NewMessageUsecase, NewIncomeUsecase)
+var ProviderSet = wire.NewSet(
+	NewGreeterUsecase,
+	NewAuthUsecase,
+	NewOrderUsecase,
+	NewMessageUsecase,
+	NewIncomeUsecase,
+	NewAIAgentUsecase,
+	NewQualificationUsecase,
+	NewTicketUseCase,
+	NewVectorDBService,
+	NewLLMService,
+	ai.NewOCRService,
+	ai.NewASRService,
+)

@@ -35,6 +35,14 @@ func AutoMigrate(db *gorm.DB) error {
 		&model.IDCardVerification{},
 		&model.DriverLicenseVerification{},
 		&model.HealthCertificateVerification{},
+		// 新增：骑手拉新模块
+		&model.ReferralInviteCode{},
+		&model.ReferralRelation{},
+		&model.ReferralTask{},
+		&model.ReferralTaskProgress{},
+		&model.ReferralRewardRecord{},
+		&model.ReferralRiskLog{},
+		&model.ReferralStatistics{},
 	)
 	if err != nil {
 		return err

@@ -46,8 +46,21 @@ message Data {
     string api_id = 1;
     string api_key = 2;
   }
+  message AIService {
+    string ocr_access_key = 1;
+    string ocr_secret_key = 2;
+    string asr_app_id = 3;
+    string asr_token = 4;
+    string llm_api_key = 5;
+    string llm_base_url = 6;
+    string llm_model = 7;
+    string embedding_api_key = 8;
+    string embedding_base_url = 9;
+    string embedding_model = 10;
+  }
   Database database = 1;
   Redis redis = 2;
   Rabbitmq rabbitmq = 3;
   Sms sms = 4;
+  AIService ai_service = 5;
 }

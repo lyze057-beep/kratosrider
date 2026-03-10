@@ -12,7 +12,7 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, authService *service.AuthService, orderService *service.OrderService, messageService *service.MessageService, incomeService *service.IncomeService, aiAgentService *service.AIAgentService, qualificationService *service.QualificationService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, authService *service.AuthService, orderService *service.OrderService, messageService *service.MessageService, incomeService *service.IncomeService, aiAgentService *service.AIAgentService, qualificationService *service.QualificationService, referralService *service.ReferralService, logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -36,5 +36,7 @@ func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, authService 
 	// 新增：AI智能体客服和资质验证服务
 	riderV1.RegisterAIAgentHTTPServer(srv, aiAgentService)
 	riderV1.RegisterQualificationHTTPServer(srv, qualificationService)
+	// 新增：骑手拉新服务
+	riderV1.RegisterReferralHTTPServer(srv, referralService)
 	return srv
 }

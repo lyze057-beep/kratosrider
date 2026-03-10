@@ -1141,7 +1141,7 @@ type VerifyQualificationRequest struct {
 
 	RiderId      int64  `protobuf:"varint,1,opt,name=rider_id,json=riderId,proto3" json:"rider_id,omitempty"`               // 骑手ID
 	ItemType     string `protobuf:"bytes,2,opt,name=item_type,json=itemType,proto3" json:"item_type,omitempty"`             // 验证项目类型：idcard-身份证, driver_license-驾驶证, health_certificate-健康证
-	Status       int32  `protobuf:"varint,3,opt,name=status,proto3" json:"status,omitempty"`                                // 审核状态：1-通过, 2-拒绝
+	Status       int32  `protobuf:"varint,3,opt,name=status,proto3" json:"status,omitempty"`                                // 审核状态：2-通过, 3-拒绝
 	RejectReason string `protobuf:"bytes,4,opt,name=reject_reason,json=rejectReason,proto3" json:"reject_reason,omitempty"` // 拒绝原因（仅当status=2时必填）
 	VerifyResult string `protobuf:"bytes,5,opt,name=verify_result,json=verifyResult,proto3" json:"verify_result,omitempty"` // 审核结果说明
 }

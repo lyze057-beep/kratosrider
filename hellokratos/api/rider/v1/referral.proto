@@ -1,0 +1,285 @@
+syntax = "proto3";
+
+package api.rider.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "hellokratos/api/rider/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.api.referral.v1";
+option java_outer_classname = "ReferralProtoV1";
+
+// 骑手拉新服务
+service Referral {
+  // 生成邀请码
+  rpc GenerateInviteCode (GenerateInviteCodeRequest) returns (GenerateInviteCodeReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/referral/invite-code/generate"
+      body: "*"
+    };
+  }
+
+  // 获取我的邀请信息
+  rpc GetMyReferralInfo (GetMyReferralInfoRequest) returns (GetMyReferralInfoReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/referral/my-info"
+    };
+  }
+
+  // 获取邀请记录列表
+  rpc GetInviteRecordList (GetInviteRecordListRequest) returns (GetInviteRecordListReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/referral/invite-records"
+    };
+  }
+
+  // 验证邀请码
+  rpc ValidateInviteCode (ValidateInviteCodeRequest) returns (ValidateInviteCodeReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/referral/invite-code/validate"
+      body: "*"
+    };
+  }
+
+  // 绑定邀请关系（新骑手注册时调用）
+  rpc BindReferralRelation (BindReferralRelationRequest) returns (BindReferralRelationReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/referral/bind"
+      body: "*"
+    };
+  }
+
+  // 获取任务列表
+  rpc GetTaskList (GetTaskListRequest) returns (GetTaskListReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/referral/tasks"
+    };
+  }
+
+  // 获取任务进度
+  rpc GetTaskProgress (GetTaskProgressRequest) returns (GetTaskProgressReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/referral/task-progress/{task_id}"
+    };
+  }
+
+  // 领取任务奖励
+  rpc ClaimTaskReward (ClaimTaskRewardRequest) returns (ClaimTaskRewardReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/referral/tasks/{task_id}/claim"
+      body: "*"
+    };
+  }
+
+  // 获取奖励记录
+  rpc GetRewardRecordList (GetRewardRecordListRequest) returns (GetRewardRecordListReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/referral/reward-records"
+    };
+  }
+
+  // 获取拉新统计数据（管理后台用）
+  rpc GetReferralStatistics (GetReferralStatisticsRequest) returns (GetReferralStatisticsReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/referral/statistics"
+    };
+  }
+}
+
+// 邀请码信息
+message InviteCodeInfo {
+  string invite_code = 1;           // 邀请码
+  string invite_link = 2;           // 邀请链接
+  google.protobuf.Timestamp created_at = 3;  // 创建时间
+  google.protobuf.Timestamp expire_at = 4;   // 过期时间
+  int32 total_invited = 5;          // 累计邀请人数
+  int32 valid_invited = 6;          // 有效邀请人数
+  int32 total_rewards = 7;          // 累计获得奖励金额（分）
+}
+
+// 被邀请人信息
+message InvitedRiderInfo {
+  int64 rider_id = 1;               // 骑手ID
+  string phone = 2;                 // 手机号（脱敏）
+  string nickname = 3;              // 昵称
+  int32 status = 4;                 // 状态：1-已注册 2-已完成首单 3-任务达标 4-已奖励
+  google.protobuf.Timestamp register_at = 5; // 注册时间
+  google.protobuf.Timestamp first_order_at = 6; // 首单时间
+  google.protobuf.Timestamp task_completed_at = 7; // 任务完成时间
+  int32 reward_amount = 8;          // 获得奖励金额（分）
+}
+
+// 任务信息
+message TaskInfo {
+  int64 task_id = 1;                // 任务ID
+  string task_name = 2;             // 任务名称
+  string task_desc = 3;             // 任务描述
+  int32 task_type = 4;              // 任务类型：1-首单任务 2-在线时长任务 3-完成单量任务
+  int32 target_value = 5;           // 目标值
+  int32 reward_amount = 6;          // 奖励金额（分）
+  int32 time_limit_days = 7;        // 时间限制（天）
+  google.protobuf.Timestamp start_time = 8;  // 任务开始时间
+  google.protobuf.Timestamp end_time = 9;    // 任务结束时间
+}
+
+// 任务进度信息
+message TaskProgressInfo {
+  int64 task_id = 1;                // 任务ID
+  string task_name = 2;             // 任务名称
+  int32 current_value = 3;          // 当前完成值
+  int32 target_value = 4;           // 目标值
+  int32 progress_percent = 5;       // 进度百分比
+  int32 status = 6;                 // 状态：0-未开始 1-进行中 2-已完成 3-已过期
+  google.protobuf.Timestamp deadline = 7;    // 截止时间
+  bool is_claimed = 8;              // 是否已领取奖励
+}
+
+// 奖励记录
+message RewardRecord {
+  int64 record_id = 1;              // 记录ID
+  int64 task_id = 2;                // 任务ID
+  string task_name = 3;             // 任务名称
+  int32 reward_amount = 4;          // 奖励金额（分）
+  int32 reward_type = 5;            // 奖励类型：1-现金 2-积分
+  int32 status = 6;                 // 状态：1-待发放 2-已发放 3-发放失败
+  google.protobuf.Timestamp created_at = 7;  // 创建时间
+  google.protobuf.Timestamp issued_at = 8;   // 发放时间
+}
+
+// 生成邀请码请求
+message GenerateInviteCodeRequest {
+  int64 rider_id = 1;               // 骑手ID
+}
+
+// 生成邀请码响应
+message GenerateInviteCodeReply {
+  InviteCodeInfo invite_code_info = 1;
+}
+
+// 获取我的邀请信息请求
+message GetMyReferralInfoRequest {
+  int64 rider_id = 1;               // 骑手ID
+}
+
+// 获取我的邀请信息响应
+message GetMyReferralInfoReply {
+  InviteCodeInfo invite_code_info = 1;
+  int32 today_invited = 2;          // 今日邀请人数
+  int32 month_invited = 3;          // 本月邀请人数
+  int32 pending_rewards = 4;        // 待领取奖励金额（分）
+}
+
+// 获取邀请记录列表请求
+message GetInviteRecordListRequest {
+  int64 rider_id = 1;               // 骑手ID
+  int32 page = 2;                   // 页码
+  int32 page_size = 3;              // 每页数量
+  int32 status = 4;                 // 状态筛选：0-全部 1-已注册 2-已完成首单 3-任务达标
+}
+
+// 获取邀请记录列表响应
+message GetInviteRecordListReply {
+  repeated InvitedRiderInfo records = 1;
+  int32 total = 2;                  // 总记录数
+  int32 page = 3;                   // 当前页码
+  int32 page_size = 4;              // 每页数量
+}
+
+// 验证邀请码请求
+message ValidateInviteCodeRequest {
+  string invite_code = 1;           // 邀请码
+}
+
+// 验证邀请码响应
+message ValidateInviteCodeReply {
+  bool is_valid = 1;                // 是否有效
+  string inviter_name = 2;          // 邀请人名称（脱敏）
+  string message = 3;               // 提示信息
+}
+
+// 绑定邀请关系请求
+message BindReferralRelationRequest {
+  int64 new_rider_id = 1;           // 新骑手ID
+  string invite_code = 2;           // 邀请码
+  string phone = 3;                 // 手机号
+}
+
+// 绑定邀请关系响应
+message BindReferralRelationReply {
+  bool success = 1;                 // 是否成功
+  string message = 2;               // 提示信息
+  int64 inviter_id = 3;             // 邀请人ID
+}
+
+// 获取任务列表请求
+message GetTaskListRequest {
+  int64 rider_id = 1;               // 骑手ID（新骑手）
+}
+
+// 获取任务列表响应
+message GetTaskListReply {
+  repeated TaskInfo tasks = 1;
+}
+
+// 获取任务进度请求
+message GetTaskProgressRequest {
+  int64 rider_id = 1;               // 骑手ID
+  int64 task_id = 2;                // 任务ID
+}
+
+// 获取任务进度响应
+message GetTaskProgressReply {
+  TaskProgressInfo progress = 1;
+}
+
+// 领取任务奖励请求
+message ClaimTaskRewardRequest {
+  int64 rider_id = 1;               // 骑手ID（邀请人）
+  int64 task_id = 2;                // 任务ID
+}
+
+// 领取任务奖励响应
+message ClaimTaskRewardReply {
+  bool success = 1;                 // 是否成功
+  int32 reward_amount = 2;          // 奖励金额（分）
+  string message = 3;               // 提示信息
+}
+
+// 获取奖励记录请求
+message GetRewardRecordListRequest {
+  int64 rider_id = 1;               // 骑手ID
+  int32 page = 2;                   // 页码
+  int32 page_size = 3;              // 每页数量
+  int32 status = 4;                 // 状态筛选：0-全部 1-待发放 2-已发放
+}
+
+// 获取奖励记录响应
+message GetRewardRecordListReply {
+  repeated RewardRecord records = 1;
+  int32 total = 2;                  // 总记录数
+  int32 total_amount = 3;           // 累计奖励金额（分）
+}
+
+// 获取拉新统计请求
+message GetReferralStatisticsRequest {
+  string start_date = 1;            // 开始日期（YYYY-MM-DD）
+  string end_date = 2;              // 结束日期（YYYY-MM-DD）
+}
+
+// 获取拉新统计响应
+message GetReferralStatisticsReply {
+  int32 total_invited = 1;          // 总邀请人数
+  int32 valid_invited = 2;          // 有效邀请人数
+  int32 total_rewards = 3;          // 总奖励金额（分）
+  int32 conversion_rate = 4;        // 转化率（百分比）
+  repeated DailyStatistics daily_stats = 5; // 每日统计
+}
+
+// 每日统计
+message DailyStatistics {
+  string date = 1;                  // 日期
+  int32 new_invited = 2;            // 新增邀请人数
+  int32 valid_invited = 3;          // 有效邀请人数
+  int32 rewards_amount = 4;         // 奖励金额（分）
+}

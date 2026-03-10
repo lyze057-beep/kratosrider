@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "rider-app",
+    "slug": "rider-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFD700"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.meituan.rider"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFD700"
+      },
+      "package": "com.meituan.rider"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

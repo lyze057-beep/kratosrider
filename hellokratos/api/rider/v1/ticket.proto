@@ -1,0 +1,172 @@
+syntax = "proto3";
+
+package api.rider.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "hellokratos/api/rider/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.api.helloworld.v1";
+option java_outer_classname = "HelloworldProtoV1";
+
+// 工单服务
+service Ticket {
+  // 创建工单
+  rpc CreateTicket (CreateTicketRequest) returns (CreateTicketReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/ticket/create"
+      body: "*"
+    };
+  }
+
+  // 获取工单列表
+  rpc GetTicketList (GetTicketListRequest) returns (GetTicketListReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/tickets"
+    };
+  }
+
+  // 获取工单详情
+  rpc GetTicketDetail (GetTicketDetailRequest) returns (GetTicketDetailReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/ticket/{ticket_id}"
+    };
+  }
+
+  // 添加工单回复
+  rpc AddTicketReply (AddTicketReplyRequest) returns (AddTicketReplyReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/ticket/reply"
+      body: "*"
+    };
+  }
+
+  // 更新工单状态
+  rpc UpdateTicketStatus (UpdateTicketStatusRequest) returns (UpdateTicketStatusReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/ticket/status"
+      body: "*"
+    };
+  }
+
+  // 获取工单统计
+  rpc GetTicketStatistics (GetTicketStatisticsRequest) returns (GetTicketStatisticsReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/ticket/statistics"
+    };
+  }
+}
+
+// 工单信息
+message TicketInfo {
+  int64 id = 1;
+  int64 user_id = 2;
+  string ticket_type = 3;
+  string title = 4;
+  string description = 5;
+  string status = 6;
+  int64 order_id = 7;
+  repeated string attachments = 8;
+  int32 reply_count = 9;
+  google.protobuf.Timestamp last_reply_at = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+}
+
+// 工单回复信息
+message TicketReplyInfo {
+  int64 id = 1;
+  int64 ticket_id = 2;
+  int64 user_id = 3;
+  string content = 4;
+  bool is_staff = 5;
+  repeated string attachments = 6;
+  google.protobuf.Timestamp created_at = 7;
+}
+
+// 创建工单请求
+message CreateTicketRequest {
+  string ticket_type = 1;
+  string title = 2;
+  string description = 3;
+  int64 order_id = 4;
+  repeated string attachments = 5;
+}
+
+// 创建工单响应
+message CreateTicketReply {
+  int32 code = 1;
+  string message = 2;
+  int64 ticket_id = 3;
+  string status = 4;
+}
+
+// 获取工单列表请求
+message GetTicketListRequest {
+  int32 page = 1;
+  int32 page_size = 2;
+  string status = 3;
+}
+
+// 获取工单列表响应
+message GetTicketListReply {
+  int32 code = 1;
+  string message = 2;
+  repeated TicketInfo tickets = 3;
+  int64 total = 4;
+  int32 page = 5;
+}
+
+// 获取工单详情请求
+message GetTicketDetailRequest {
+  int64 ticket_id = 1;
+}
+
+// 获取工单详情响应
+message GetTicketDetailReply {
+  int32 code = 1;
+  string message = 2;
+  TicketInfo ticket = 3;
+  repeated TicketReplyInfo replies = 4;
+}
+
+// 添加工单回复请求
+message AddTicketReplyRequest {
+  int64 ticket_id = 1;
+  string content = 2;
+  repeated string attachments = 3;
+}
+
+// 添加工单回复响应
+message AddTicketReplyReply {
+  int32 code = 1;
+  string message = 2;
+  int64 reply_id = 3;
+}
+
+// 更新工单状态请求
+message UpdateTicketStatusRequest {
+  int64 ticket_id = 1;
+  string status = 2;
+}
+
+// 更新工单状态响应
+message UpdateTicketStatusReply {
+  int32 code = 1;
+  string message = 2;
+}
+
+// 获取工单统计请求
+message GetTicketStatisticsRequest {}
+
+// 获取工单统计响应
+message GetTicketStatisticsReply {
+  int32 code = 1;
+  string message = 2;
+  int64 total = 3;
+  int64 pending = 4;
+  int64 processing = 5;
+  int64 resolved = 6;
+  int64 closed = 7;
+}

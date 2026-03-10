@@ -9,6 +9,7 @@ package main
 import (
 	"context"
 	"hellokratos/internal/biz"
+	"hellokratos/internal/biz/ai"
 	"hellokratos/internal/conf"
 	"hellokratos/internal/data"
 	"hellokratos/internal/server"
@@ -44,8 +45,40 @@ func wireApp(serverConfig *conf.Server, dataConfig *conf.Data, logger log.Logger
 	messageUsecase := biz.NewMessageUsecase(messageRepo, redisClient, logger)
 	groupUsecase := biz.NewGroupUsecase(groupRepo, redisClient, logger)
 	incomeUsecase := biz.NewIncomeUsecase(incomeRepo, withdrawalRepo, orderRepo, redisClient, logger)
-	aiAgentUsecase := biz.NewAIAgentUsecase(aiAgentRepo, orderRepo, incomeRepo, logger)
+	embeddingService := biz.NewEmbeddingService()
+	vectorDBService := biz.NewVectorDBService(embeddingService)
+	llmService := biz.NewLLMService()
+	ocrService := ai.NewOCRService(dataConfig)
+	asrService := ai.NewASRService(dataConfig)
+
+	// 初始化AI服务
+	ctx := context.Background()
+	if err := embeddingService.Init(ctx, dataConfig); err != nil {
+		logger.Log(log.LevelWarn, "failed to init embedding service", "err", err)
+	}
+	if err := vectorDBService.Init(ctx, dataConfig); err != nil {
+		logger.Log(log.LevelWarn, "failed to init vectorDB service", "err", err)
+	}
+	if err := llmService.Init(ctx, dataConfig); err != nil {
+		logger.Log(log.LevelWarn, "failed to init LLM service", "err", err)
+	}
+	skillManager := biz.NewSkillManager(llmService, logger)
+	orderSkill := ai.NewOrderSkill(orderRepo)
+	incomeSkill := ai.NewIncomeSkill(incomeRepo)
+	profileSkill := ai.NewProfileSkill(authRepo, qualificationRepo)
+	navigationSkill := ai.NewNavigationSkill(dataConfig)
+	weatherSkill := ai.NewWeatherSkill(dataConfig)
+	supportSkill := ai.NewSupportSkill()
+	skillManager.RegisterSkill(orderSkill)
+	skillManager.RegisterSkill(incomeSkill)
+	skillManager.RegisterSkill(profileSkill)
+	skillManager.RegisterSkill(navigationSkill)
+	skillManager.RegisterSkill(weatherSkill)
+	skillManager.RegisterSkill(supportSkill)
+	aiAgentUsecase := biz.NewAIAgentUsecase(aiAgentRepo, orderRepo, incomeRepo, vectorDBService, llmService, ocrService, asrService, skillManager, logger)
 	qualificationUsecase := biz.NewQualificationUsecase(qualificationRepo, logger)
+	referralRepo := data.NewReferralRepo(dataInstance)
+	referralUsecase := biz.NewReferralUsecase(referralRepo, logger, dataConfig)
 	greeterService := service.NewGreeterService(greeterUsecase)
 	authService := service.NewAuthService(authUsecase, logger)
 	orderService := service.NewOrderService(orderUsecase, logger)
@@ -53,8 +86,9 @@ func wireApp(serverConfig *conf.Server, dataConfig *conf.Data, logger log.Logger
 	incomeService := service.NewIncomeService(incomeUsecase, logger)
 	aiAgentService := service.NewAIAgentService(aiAgentUsecase, logger)
 	qualificationService := service.NewQualificationService(qualificationUsecase, logger)
-	grpcServer := server.NewGRPCServer(serverConfig, greeterService, authService, orderService, messageService, incomeService, aiAgentService, qualificationService, logger)
-	httpServer := server.NewHTTPServer(serverConfig, greeterService, authService, orderService, messageService, incomeService, aiAgentService, qualificationService, logger)
+	referralService := service.NewReferralService(referralUsecase)
+	grpcServer := server.NewGRPCServer(serverConfig, greeterService, authService, orderService, messageService, incomeService, aiAgentService, qualificationService, referralService, logger)
+	httpServer := server.NewHTTPServer(serverConfig, greeterService, authService, orderService, messageService, incomeService, aiAgentService, qualificationService, referralService, logger)
 	if err := orderMessageConsumer.StartConsuming(context.Background()); err != nil {
 		logger.Log(log.LevelError, "failed to start order message consumer", "err", err)
 	}

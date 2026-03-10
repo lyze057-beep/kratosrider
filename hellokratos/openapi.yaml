@@ -25,6 +25,206 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/helloworld.v1.HelloReply'
+    /rider/v1/admin/deactivation/detail/{deactivationId}:
+        get:
+            tags:
+                - DeactivationService
+            description: 获取注销详情
+            operationId: DeactivationService_GetDeactivationDetail
+            parameters:
+                - name: deactivationId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetDeactivationDetailReply'
+    /rider/v1/admin/deactivation/list:
+        get:
+            tags:
+                - DeactivationService
+            description: 获取注销申请列表
+            operationId: DeactivationService_GetDeactivationList
+            parameters:
+                - name: status
+                  in: query
+                  schema:
+                    type: integer
+                    format: enum
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetDeactivationListReply'
+    /rider/v1/admin/deactivation/review:
+        post:
+            tags:
+                - DeactivationService
+            description: 审核注销申请
+            operationId: DeactivationService_ReviewDeactivation
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.ReviewDeactivationRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.ReviewDeactivationReply'
+    /rider/v1/admin/deactivation/statistics:
+        get:
+            tags:
+                - DeactivationService
+            description: 获取注销统计
+            operationId: DeactivationService_GetDeactivationStatistics
+            parameters:
+                - name: startDate
+                  in: query
+                  schema:
+                    type: string
+                - name: endDate
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetDeactivationStatisticsReply'
+    /rider/v1/admin/rating/hide:
+        post:
+            tags:
+                - RatingService
+            description: 隐藏评分
+            operationId: RatingService_HideRating
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.HideRatingRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.HideRatingReply'
+    /rider/v1/admin/rating/list:
+        get:
+            tags:
+                - RatingService
+            description: 获取评分列表
+            operationId: RatingService_GetRatingList
+            parameters:
+                - name: riderId
+                  in: query
+                  schema:
+                    type: string
+                - name: source
+                  in: query
+                  schema:
+                    type: integer
+                    format: enum
+                - name: minScore
+                  in: query
+                  schema:
+                    type: number
+                    format: double
+                - name: maxScore
+                  in: query
+                  schema:
+                    type: number
+                    format: double
+                - name: startTime
+                  in: query
+                  schema:
+                    type: string
+                - name: endTime
+                  in: query
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetRatingListReply'
+    /rider/v1/admin/rating/recalculate:
+        post:
+            tags:
+                - RatingService
+            description: 重新计算评分
+            operationId: RatingService_RecalculateRating
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.RecalculateRatingRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.RecalculateRatingReply'
+    /rider/v1/admin/rating/statistics:
+        get:
+            tags:
+                - RatingService
+            description: 获取评分统计
+            operationId: RatingService_GetRatingStatistics
+            parameters:
+                - name: startDate
+                  in: query
+                  schema:
+                    type: string
+                - name: endDate
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetRatingStatisticsReply'
     /rider/v1/ai-agent/faq:
         get:
             tags:
@@ -154,6 +354,75 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.rider.v1.SendCodeReply'
+    /rider/v1/deactivation/apply:
+        post:
+            tags:
+                - DeactivationService
+            description: 申请注销
+            operationId: DeactivationService_ApplyDeactivation
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.ApplyDeactivationRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.ApplyDeactivationReply'
+    /rider/v1/deactivation/cancel:
+        post:
+            tags:
+                - DeactivationService
+            description: 取消注销申请
+            operationId: DeactivationService_CancelDeactivation
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.CancelDeactivationRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.CancelDeactivationReply'
+    /rider/v1/deactivation/reasons:
+        get:
+            tags:
+                - DeactivationService
+            description: 获取注销原因列表
+            operationId: DeactivationService_GetDeactivationReasons
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetDeactivationReasonsReply'
+    /rider/v1/deactivation/status:
+        get:
+            tags:
+                - DeactivationService
+            description: 获取注销状态
+            operationId: DeactivationService_GetDeactivationStatus
+            parameters:
+                - name: riderId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetDeactivationStatusReply'
     /rider/v1/group/create:
         post:
             tags:
@@ -758,6 +1027,363 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.rider.v1.VerifyQualificationReply'
+    /rider/v1/rating/detail/{recordId}:
+        get:
+            tags:
+                - RatingService
+            description: 获取评分详情
+            operationId: RatingService_GetRatingDetail
+            parameters:
+                - name: recordId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetRatingDetailReply'
+    /rider/v1/rating/records:
+        get:
+            tags:
+                - RatingService
+            description: 获取评分记录列表
+            operationId: RatingService_GetRatingRecords
+            parameters:
+                - name: riderId
+                  in: query
+                  schema:
+                    type: string
+                - name: source
+                  in: query
+                  schema:
+                    type: integer
+                    format: enum
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetRatingRecordsReply'
+    /rider/v1/rating/reply:
+        post:
+            tags:
+                - RatingService
+            description: 回复评价
+            operationId: RatingService_ReplyToRating
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.ReplyToRatingRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.ReplyToRatingReply'
+    /rider/v1/rating/submit:
+        post:
+            tags:
+                - RatingService
+            description: 提交评分
+            operationId: RatingService_SubmitRating
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.SubmitRatingRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.SubmitRatingReply'
+    /rider/v1/rating/summary/{riderId}:
+        get:
+            tags:
+                - RatingService
+            description: 获取评分汇总
+            operationId: RatingService_GetRatingSummary
+            parameters:
+                - name: riderId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetRatingSummaryReply'
+    /rider/v1/rating/{riderId}:
+        get:
+            tags:
+                - RatingService
+            description: 获取骑手评分
+            operationId: RatingService_GetRiderRating
+            parameters:
+                - name: riderId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetRiderRatingReply'
+    /rider/v1/referral/bind:
+        post:
+            tags:
+                - Referral
+            description: 绑定邀请关系（新骑手注册时调用）
+            operationId: Referral_BindReferralRelation
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.BindReferralRelationRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.BindReferralRelationReply'
+    /rider/v1/referral/invite-code/generate:
+        post:
+            tags:
+                - Referral
+            description: 生成邀请码
+            operationId: Referral_GenerateInviteCode
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.GenerateInviteCodeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GenerateInviteCodeReply'
+    /rider/v1/referral/invite-code/validate:
+        post:
+            tags:
+                - Referral
+            description: 验证邀请码
+            operationId: Referral_ValidateInviteCode
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.ValidateInviteCodeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.ValidateInviteCodeReply'
+    /rider/v1/referral/invite-records:
+        get:
+            tags:
+                - Referral
+            description: 获取邀请记录列表
+            operationId: Referral_GetInviteRecordList
+            parameters:
+                - name: riderId
+                  in: query
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetInviteRecordListReply'
+    /rider/v1/referral/my-info:
+        get:
+            tags:
+                - Referral
+            description: 获取我的邀请信息
+            operationId: Referral_GetMyReferralInfo
+            parameters:
+                - name: riderId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetMyReferralInfoReply'
+    /rider/v1/referral/reward-records:
+        get:
+            tags:
+                - Referral
+            description: 获取奖励记录
+            operationId: Referral_GetRewardRecordList
+            parameters:
+                - name: riderId
+                  in: query
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetRewardRecordListReply'
+    /rider/v1/referral/statistics:
+        get:
+            tags:
+                - Referral
+            description: 获取拉新统计数据（管理后台用）
+            operationId: Referral_GetReferralStatistics
+            parameters:
+                - name: startDate
+                  in: query
+                  schema:
+                    type: string
+                - name: endDate
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetReferralStatisticsReply'
+    /rider/v1/referral/task-progress/{taskId}:
+        get:
+            tags:
+                - Referral
+            description: 获取任务进度
+            operationId: Referral_GetTaskProgress
+            parameters:
+                - name: taskId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: riderId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetTaskProgressReply'
+    /rider/v1/referral/tasks:
+        get:
+            tags:
+                - Referral
+            description: 获取任务列表
+            operationId: Referral_GetTaskList
+            parameters:
+                - name: riderId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetTaskListReply'
+    /rider/v1/referral/tasks/{taskId}/claim:
+        post:
+            tags:
+                - Referral
+            description: 领取任务奖励
+            operationId: Referral_ClaimTaskReward
+            parameters:
+                - name: taskId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.ClaimTaskRewardRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.ClaimTaskRewardReply'
     /rider/v1/register:
         post:
             tags:
@@ -777,6 +1403,123 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.rider.v1.LoginReply'
+    /rider/v1/ticket/create:
+        post:
+            tags:
+                - Ticket
+            description: 创建工单
+            operationId: Ticket_CreateTicket
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.CreateTicketRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.CreateTicketReply'
+    /rider/v1/ticket/reply:
+        post:
+            tags:
+                - Ticket
+            description: 添加工单回复
+            operationId: Ticket_AddTicketReply
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.AddTicketReplyRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.AddTicketReplyReply'
+    /rider/v1/ticket/statistics:
+        get:
+            tags:
+                - Ticket
+            description: 获取工单统计
+            operationId: Ticket_GetTicketStatistics
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetTicketStatisticsReply'
+    /rider/v1/ticket/status:
+        post:
+            tags:
+                - Ticket
+            description: 更新工单状态
+            operationId: Ticket_UpdateTicketStatus
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.rider.v1.UpdateTicketStatusRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.UpdateTicketStatusReply'
+    /rider/v1/ticket/{ticketId}:
+        get:
+            tags:
+                - Ticket
+            description: 获取工单详情
+            operationId: Ticket_GetTicketDetail
+            parameters:
+                - name: ticketId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetTicketDetailReply'
+    /rider/v1/tickets:
+        get:
+            tags:
+                - Ticket
+            description: 获取工单列表
+            operationId: Ticket_GetTicketList
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.rider.v1.GetTicketListReply'
     /rider/v1/token/refresh:
         post:
             tags:
@@ -1001,6 +1744,59 @@ components:
                 riderId:
                     type: string
             description: 接单请求
+        api.rider.v1.AddTicketReplyReply:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+                replyId:
+                    type: string
+            description: 添加工单回复响应
+        api.rider.v1.AddTicketReplyRequest:
+            type: object
+            properties:
+                ticketId:
+                    type: string
+                content:
+                    type: string
+                attachments:
+                    type: array
+                    items:
+                        type: string
+            description: 添加工单回复请求
+        api.rider.v1.ApplyDeactivationReply:
+            type: object
+            properties:
+                deactivationId:
+                    type: string
+                status:
+                    type: integer
+                    format: enum
+                checklist:
+                    $ref: '#/components/schemas/api.rider.v1.DeactivationCheckResult'
+                message:
+                    type: string
+            description: 申请注销响应
+        api.rider.v1.ApplyDeactivationRequest:
+            type: object
+            properties:
+                riderId:
+                    type: string
+                reasonType:
+                    type: integer
+                    format: enum
+                reasonDetail:
+                    type: string
+                phone:
+                    type: string
+                ip:
+                    type: string
+                deviceId:
+                    type: string
+            description: 申请注销请求
         api.rider.v1.ApplyWithdrawalReply:
             type: object
             properties:
@@ -1024,6 +1820,75 @@ components:
                 account:
                     type: string
             description: 申请提现请求
+        api.rider.v1.BindReferralRelationReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+                inviterId:
+                    type: string
+            description: 绑定邀请关系响应
+        api.rider.v1.BindReferralRelationRequest:
+            type: object
+            properties:
+                newRiderId:
+                    type: string
+                inviteCode:
+                    type: string
+                phone:
+                    type: string
+            description: 绑定邀请关系请求
+        api.rider.v1.CancelDeactivationReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+            description: 取消注销响应
+        api.rider.v1.CancelDeactivationRequest:
+            type: object
+            properties:
+                riderId:
+                    type: string
+                deactivationId:
+                    type: string
+            description: 取消注销请求
+        api.rider.v1.ClaimTaskRewardReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                rewardAmount:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+            description: 领取任务奖励响应
+        api.rider.v1.ClaimTaskRewardRequest:
+            type: object
+            properties:
+                riderId:
+                    type: string
+                taskId:
+                    type: string
+            description: 领取任务奖励请求
+        api.rider.v1.CooldownInfo:
+            type: object
+            properties:
+                inCooldown:
+                    type: boolean
+                cooldownEndAt:
+                    type: string
+                    format: date-time
+                deactivationCount:
+                    type: integer
+                    format: int32
+                canReactivate:
+                    type: boolean
+            description: 冷却期信息
         api.rider.v1.CreateGroupReply:
             type: object
             properties:
@@ -1109,6 +1974,199 @@ components:
                     type: number
                     format: float
             description: 创建订单请求
+        api.rider.v1.CreateTicketReply:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+                ticketId:
+                    type: string
+                status:
+                    type: string
+            description: 创建工单响应
+        api.rider.v1.CreateTicketRequest:
+            type: object
+            properties:
+                ticketType:
+                    type: string
+                title:
+                    type: string
+                description:
+                    type: string
+                orderId:
+                    type: string
+                attachments:
+                    type: array
+                    items:
+                        type: string
+            description: 创建工单请求
+        api.rider.v1.DailyStatistics:
+            type: object
+            properties:
+                date:
+                    type: string
+                newInvited:
+                    type: integer
+                    format: int32
+                validInvited:
+                    type: integer
+                    format: int32
+                rewardsAmount:
+                    type: integer
+                    format: int32
+            description: 每日统计
+        api.rider.v1.DeactivationCheckResult:
+            type: object
+            properties:
+                canDeactivate:
+                    type: boolean
+                hasPendingOrders:
+                    type: boolean
+                hasPendingIncome:
+                    type: boolean
+                hasPendingComplaint:
+                    type: boolean
+                hasEquipmentDebt:
+                    type: boolean
+                hasViolationRecord:
+                    type: boolean
+                isBalanceClear:
+                    type: boolean
+                blockingItems:
+                    type: array
+                    items:
+                        type: string
+            description: 注销检查结果
+        api.rider.v1.DeactivationHistory:
+            type: object
+            properties:
+                id:
+                    type: string
+                action:
+                    type: string
+                actionTime:
+                    type: string
+                    format: date-time
+                operatorId:
+                    type: string
+                operatorType:
+                    type: integer
+                    format: int32
+                remark:
+                    type: string
+            description: 注销历史
+        api.rider.v1.DeactivationInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                riderId:
+                    type: string
+                reasonType:
+                    type: integer
+                    format: enum
+                reasonDetail:
+                    type: string
+                status:
+                    type: integer
+                    format: enum
+                applyTime:
+                    type: string
+                    format: date-time
+                reviewTime:
+                    type: string
+                    format: date-time
+                reviewerId:
+                    type: string
+                reviewRemark:
+                    type: string
+                completeTime:
+                    type: string
+                    format: date-time
+                clearanceStatus:
+                    type: integer
+                    format: int32
+                pendingIncome:
+                    type: string
+                pendingPenalty:
+                    type: string
+                finalSettlement:
+                    type: string
+            description: 注销信息
+        api.rider.v1.GenerateInviteCodeReply:
+            type: object
+            properties:
+                inviteCodeInfo:
+                    $ref: '#/components/schemas/api.rider.v1.InviteCodeInfo'
+            description: 生成邀请码响应
+        api.rider.v1.GenerateInviteCodeRequest:
+            type: object
+            properties:
+                riderId:
+                    type: string
+            description: 生成邀请码请求
+        api.rider.v1.GetDeactivationDetailReply:
+            type: object
+            properties:
+                deactivation:
+                    $ref: '#/components/schemas/api.rider.v1.DeactivationInfo'
+                checklist:
+                    $ref: '#/components/schemas/api.rider.v1.DeactivationCheckResult'
+                history:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.rider.v1.DeactivationHistory'
+            description: 获取注销详情响应
+        api.rider.v1.GetDeactivationListReply:
+            type: object
+            properties:
+                list:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.rider.v1.DeactivationInfo'
+                total:
+                    type: string
+            description: 获取注销申请列表响应
+        api.rider.v1.GetDeactivationReasonsReply:
+            type: object
+            properties:
+                reasons:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.rider.v1.ReasonItem'
+            description: 获取注销原因列表响应
+        api.rider.v1.GetDeactivationStatisticsReply:
+            type: object
+            properties:
+                totalApply:
+                    type: string
+                pendingCount:
+                    type: string
+                approvedCount:
+                    type: string
+                rejectedCount:
+                    type: string
+                completedCount:
+                    type: string
+                avgProcessTime:
+                    type: number
+                    format: double
+                totalSettlement:
+                    type: string
+            description: 获取注销统计响应
+        api.rider.v1.GetDeactivationStatusReply:
+            type: object
+            properties:
+                deactivation:
+                    $ref: '#/components/schemas/api.rider.v1.DeactivationInfo'
+                checklist:
+                    $ref: '#/components/schemas/api.rider.v1.DeactivationCheckResult'
+                cooldown:
+                    $ref: '#/components/schemas/api.rider.v1.CooldownInfo'
+            description: 获取注销状态响应
         api.rider.v1.GetGroupListReply:
             type: object
             properties:
@@ -1153,6 +2211,23 @@ components:
                     type: integer
                     format: int32
             description: 获取收入列表响应
+        api.rider.v1.GetInviteRecordListReply:
+            type: object
+            properties:
+                records:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.rider.v1.InvitedRiderInfo'
+                total:
+                    type: integer
+                    format: int32
+                page:
+                    type: integer
+                    format: int32
+                pageSize:
+                    type: integer
+                    format: int32
+            description: 获取邀请记录列表响应
         api.rider.v1.GetMessageListReply:
             type: object
             properties:
@@ -1164,6 +2239,21 @@ components:
                     type: integer
                     format: int32
             description: 获取消息列表响应
+        api.rider.v1.GetMyReferralInfoReply:
+            type: object
+            properties:
+                inviteCodeInfo:
+                    $ref: '#/components/schemas/api.rider.v1.InviteCodeInfo'
+                todayInvited:
+                    type: integer
+                    format: int32
+                monthInvited:
+                    type: integer
+                    format: int32
+                pendingRewards:
+                    type: integer
+                    format: int32
+            description: 获取我的邀请信息响应
         api.rider.v1.GetOrderDetailReply:
             type: object
             properties:
@@ -1187,6 +2277,165 @@ components:
                     type: integer
                     format: int32
             description: 获取订单列表响应
+        api.rider.v1.GetRatingDetailReply:
+            type: object
+            properties:
+                record:
+                    $ref: '#/components/schemas/api.rider.v1.RatingRecord'
+            description: 获取评分详情响应
+        api.rider.v1.GetRatingListReply:
+            type: object
+            properties:
+                list:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.rider.v1.RatingRecord'
+                total:
+                    type: string
+            description: 获取评分列表响应
+        api.rider.v1.GetRatingRecordsReply:
+            type: object
+            properties:
+                list:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.rider.v1.RatingRecord'
+                total:
+                    type: string
+            description: 获取评分记录列表响应
+        api.rider.v1.GetRatingStatisticsReply:
+            type: object
+            properties:
+                totalRatings:
+                    type: string
+                avgScore:
+                    type: number
+                    format: double
+                fiveStarRate:
+                    type: number
+                    format: double
+                positiveRate:
+                    type: number
+                    format: double
+                negativeRate:
+                    type: number
+                    format: double
+                complaintRate:
+                    type: number
+                    format: double
+            description: 获取评分统计响应
+        api.rider.v1.GetRatingSummaryReply:
+            type: object
+            properties:
+                summary:
+                    $ref: '#/components/schemas/api.rider.v1.RatingSummary'
+            description: 获取评分汇总响应
+        api.rider.v1.GetReferralStatisticsReply:
+            type: object
+            properties:
+                totalInvited:
+                    type: integer
+                    format: int32
+                validInvited:
+                    type: integer
+                    format: int32
+                totalRewards:
+                    type: integer
+                    format: int32
+                conversionRate:
+                    type: integer
+                    format: int32
+                dailyStats:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.rider.v1.DailyStatistics'
+            description: 获取拉新统计响应
+        api.rider.v1.GetRewardRecordListReply:
+            type: object
+            properties:
+                records:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.rider.v1.RewardRecord'
+                total:
+                    type: integer
+                    format: int32
+                totalAmount:
+                    type: integer
+                    format: int32
+            description: 获取奖励记录响应
+        api.rider.v1.GetRiderRatingReply:
+            type: object
+            properties:
+                rating:
+                    $ref: '#/components/schemas/api.rider.v1.RiderRating'
+            description: 获取骑手评分响应
+        api.rider.v1.GetTaskListReply:
+            type: object
+            properties:
+                tasks:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.rider.v1.TaskInfo'
+            description: 获取任务列表响应
+        api.rider.v1.GetTaskProgressReply:
+            type: object
+            properties:
+                progress:
+                    $ref: '#/components/schemas/api.rider.v1.TaskProgressInfo'
+            description: 获取任务进度响应
+        api.rider.v1.GetTicketDetailReply:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+                ticket:
+                    $ref: '#/components/schemas/api.rider.v1.TicketInfo'
+                replies:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.rider.v1.TicketReplyInfo'
+            description: 获取工单详情响应
+        api.rider.v1.GetTicketListReply:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+                tickets:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.rider.v1.TicketInfo'
+                total:
+                    type: string
+                page:
+                    type: integer
+                    format: int32
+            description: 获取工单列表响应
+        api.rider.v1.GetTicketStatisticsReply:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+                total:
+                    type: string
+                pending:
+                    type: string
+                processing:
+                    type: string
+                resolved:
+                    type: string
+                closed:
+                    type: string
+            description: 获取工单统计响应
         api.rider.v1.GetTotalIncomeReply:
             type: object
             properties:
@@ -1276,6 +2525,18 @@ components:
                 createdAt:
                     type: string
             description: 群聊消息信息
+        api.rider.v1.HideRatingReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+            description: 隐藏评分响应
+        api.rider.v1.HideRatingRequest:
+            type: object
+            properties:
+                recordId:
+                    type: string
+            description: 隐藏评分请求
         api.rider.v1.IncomeInfo:
             type: object
             properties:
@@ -1297,6 +2558,54 @@ components:
                 createdAt:
                     type: string
             description: 收入信息
+        api.rider.v1.InviteCodeInfo:
+            type: object
+            properties:
+                inviteCode:
+                    type: string
+                inviteLink:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+                expireAt:
+                    type: string
+                    format: date-time
+                totalInvited:
+                    type: integer
+                    format: int32
+                validInvited:
+                    type: integer
+                    format: int32
+                totalRewards:
+                    type: integer
+                    format: int32
+            description: 邀请码信息
+        api.rider.v1.InvitedRiderInfo:
+            type: object
+            properties:
+                riderId:
+                    type: string
+                phone:
+                    type: string
+                nickname:
+                    type: string
+                status:
+                    type: integer
+                    format: int32
+                registerAt:
+                    type: string
+                    format: date-time
+                firstOrderAt:
+                    type: string
+                    format: date-time
+                taskCompletedAt:
+                    type: string
+                    format: date-time
+                rewardAmount:
+                    type: integer
+                    format: int32
+            description: 被邀请人信息
         api.rider.v1.JoinGroupReply:
             type: object
             properties:
@@ -1465,6 +2774,107 @@ components:
                 message:
                     type: string
             description: 总体状态
+        api.rider.v1.RatingRecord:
+            type: object
+            properties:
+                id:
+                    type: string
+                riderId:
+                    type: string
+                orderId:
+                    type: string
+                raterId:
+                    type: string
+                raterType:
+                    type: integer
+                    format: int32
+                source:
+                    type: integer
+                    format: enum
+                dimension:
+                    type: integer
+                    format: enum
+                score:
+                    type: number
+                    format: double
+                tags:
+                    type: array
+                    items:
+                        type: string
+                comment:
+                    type: string
+                isAnonymous:
+                    type: boolean
+                isVisible:
+                    type: boolean
+                reply:
+                    type: string
+                replyTime:
+                    type: string
+                    format: date-time
+                createdAt:
+                    type: string
+                    format: date-time
+            description: 评分记录
+        api.rider.v1.RatingSummary:
+            type: object
+            properties:
+                overallScore:
+                    type: number
+                    format: double
+                deliveryScore:
+                    type: number
+                    format: double
+                serviceScore:
+                    type: number
+                    format: double
+                attitudeScore:
+                    type: number
+                    format: double
+                punctualityScore:
+                    type: number
+                    format: double
+                totalRatings:
+                    type: integer
+                    format: int32
+                ratingLevel:
+                    type: integer
+                    format: int32
+                ratingTrend:
+                    type: integer
+                    format: int32
+                starDistribution:
+                    $ref: '#/components/schemas/api.rider.v1.StarDistribution'
+            description: 评分汇总
+        api.rider.v1.ReasonItem:
+            type: object
+            properties:
+                reasonType:
+                    type: integer
+                    format: enum
+                reasonName:
+                    type: string
+                description:
+                    type: string
+            description: 原因项
+        api.rider.v1.RecalculateRatingReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                newScore:
+                    type: number
+                    format: double
+                newLevel:
+                    type: integer
+                    format: int32
+            description: 重新计算评分响应
+        api.rider.v1.RecalculateRatingRequest:
+            type: object
+            properties:
+                riderId:
+                    type: string
+            description: 重新计算评分请求
         api.rider.v1.RefreshTokenRequest:
             type: object
             properties:
@@ -1483,6 +2893,23 @@ components:
                 nickname:
                     type: string
             description: 注册请求
+        api.rider.v1.ReplyToRatingReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                replyTime:
+                    type: string
+                    format: date-time
+            description: 回复评价响应
+        api.rider.v1.ReplyToRatingRequest:
+            type: object
+            properties:
+                recordId:
+                    type: string
+                reply:
+                    type: string
+            description: 回复评价请求
         api.rider.v1.ResubmitVerificationReply:
             type: object
             properties:
@@ -1501,6 +2928,96 @@ components:
                 reason:
                     type: string
             description: 重新提交验证材料请求
+        api.rider.v1.ReviewDeactivationReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                newStatus:
+                    type: integer
+                    format: enum
+                message:
+                    type: string
+            description: 审核注销响应
+        api.rider.v1.ReviewDeactivationRequest:
+            type: object
+            properties:
+                deactivationId:
+                    type: string
+                reviewerId:
+                    type: string
+                action:
+                    type: string
+                remark:
+                    type: string
+            description: 审核注销请求
+        api.rider.v1.RewardRecord:
+            type: object
+            properties:
+                recordId:
+                    type: string
+                taskId:
+                    type: string
+                taskName:
+                    type: string
+                rewardAmount:
+                    type: integer
+                    format: int32
+                rewardType:
+                    type: integer
+                    format: int32
+                status:
+                    type: integer
+                    format: int32
+                createdAt:
+                    type: string
+                    format: date-time
+                issuedAt:
+                    type: string
+                    format: date-time
+            description: 奖励记录
+        api.rider.v1.RiderRating:
+            type: object
+            properties:
+                riderId:
+                    type: string
+                overallScore:
+                    type: number
+                    format: double
+                deliveryScore:
+                    type: number
+                    format: double
+                serviceScore:
+                    type: number
+                    format: double
+                attitudeScore:
+                    type: number
+                    format: double
+                punctualityScore:
+                    type: number
+                    format: double
+                totalRatings:
+                    type: integer
+                    format: int32
+                userRatings:
+                    type: integer
+                    format: int32
+                merchantRatings:
+                    type: integer
+                    format: int32
+                systemRatings:
+                    type: integer
+                    format: int32
+                ratingLevel:
+                    type: integer
+                    format: int32
+                ratingTrend:
+                    type: integer
+                    format: int32
+                lastRatingAt:
+                    type: string
+                    format: date-time
+            description: 骑手评分信息
         api.rider.v1.SendCodeReply:
             type: object
             properties:
@@ -1509,6 +3026,8 @@ components:
                 expireSeconds:
                     type: integer
                     format: int32
+                code:
+                    type: string
             description: 发送短信响应
         api.rider.v1.SendCodeRequest:
             type: object
@@ -1562,6 +3081,40 @@ components:
                     type: integer
                     format: int32
             description: 发送消息请求
+        api.rider.v1.StarDistribution:
+            type: object
+            properties:
+                fiveStar:
+                    type: integer
+                    format: int32
+                fourStar:
+                    type: integer
+                    format: int32
+                threeStar:
+                    type: integer
+                    format: int32
+                twoStar:
+                    type: integer
+                    format: int32
+                oneStar:
+                    type: integer
+                    format: int32
+                fiveStarPercent:
+                    type: number
+                    format: double
+                fourStarPercent:
+                    type: number
+                    format: double
+                threeStarPercent:
+                    type: number
+                    format: double
+                twoStarPercent:
+                    type: number
+                    format: double
+                oneStarPercent:
+                    type: number
+                    format: double
+            description: 星级分布
         api.rider.v1.SubmitDriverLicenseReply:
             type: object
             properties:
@@ -1642,6 +3195,158 @@ components:
                 idCardHandheld:
                     type: string
             description: 提交身份证信息请求
+        api.rider.v1.SubmitRatingReply:
+            type: object
+            properties:
+                recordId:
+                    type: string
+                updatedScore:
+                    type: number
+                    format: double
+                ratingLevel:
+                    type: integer
+                    format: int32
+                effect:
+                    type: string
+            description: 提交评分响应
+        api.rider.v1.SubmitRatingRequest:
+            type: object
+            properties:
+                riderId:
+                    type: string
+                orderId:
+                    type: string
+                raterId:
+                    type: string
+                raterType:
+                    type: integer
+                    format: int32
+                source:
+                    type: integer
+                    format: enum
+                score:
+                    type: number
+                    format: double
+                dimension:
+                    type: integer
+                    format: enum
+                tags:
+                    type: array
+                    items:
+                        type: string
+                comment:
+                    type: string
+                isAnonymous:
+                    type: boolean
+            description: 提交评分请求
+        api.rider.v1.TaskInfo:
+            type: object
+            properties:
+                taskId:
+                    type: string
+                taskName:
+                    type: string
+                taskDesc:
+                    type: string
+                taskType:
+                    type: integer
+                    format: int32
+                targetValue:
+                    type: integer
+                    format: int32
+                rewardAmount:
+                    type: integer
+                    format: int32
+                timeLimitDays:
+                    type: integer
+                    format: int32
+                startTime:
+                    type: string
+                    format: date-time
+                endTime:
+                    type: string
+                    format: date-time
+            description: 任务信息
+        api.rider.v1.TaskProgressInfo:
+            type: object
+            properties:
+                taskId:
+                    type: string
+                taskName:
+                    type: string
+                currentValue:
+                    type: integer
+                    format: int32
+                targetValue:
+                    type: integer
+                    format: int32
+                progressPercent:
+                    type: integer
+                    format: int32
+                status:
+                    type: integer
+                    format: int32
+                deadline:
+                    type: string
+                    format: date-time
+                isClaimed:
+                    type: boolean
+            description: 任务进度信息
+        api.rider.v1.TicketInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                ticketType:
+                    type: string
+                title:
+                    type: string
+                description:
+                    type: string
+                status:
+                    type: string
+                orderId:
+                    type: string
+                attachments:
+                    type: array
+                    items:
+                        type: string
+                replyCount:
+                    type: integer
+                    format: int32
+                lastReplyAt:
+                    type: string
+                    format: date-time
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+            description: 工单信息
+        api.rider.v1.TicketReplyInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                ticketId:
+                    type: string
+                userId:
+                    type: string
+                content:
+                    type: string
+                isStaff:
+                    type: boolean
+                attachments:
+                    type: array
+                    items:
+                        type: string
+                createdAt:
+                    type: string
+                    format: date-time
+            description: 工单回复信息
         api.rider.v1.UpdateOrderStatusReply:
             type: object
             properties:
@@ -1659,6 +3364,23 @@ components:
                     type: integer
                     format: int32
             description: 更新订单状态请求
+        api.rider.v1.UpdateTicketStatusReply:
+            type: object
+            properties:
+                code:
+                    type: integer
+                    format: int32
+                message:
+                    type: string
+            description: 更新工单状态响应
+        api.rider.v1.UpdateTicketStatusRequest:
+            type: object
+            properties:
+                ticketId:
+                    type: string
+                status:
+                    type: string
+            description: 更新工单状态请求
         api.rider.v1.UpdateWithdrawalStatusReply:
             type: object
             properties:
@@ -1693,6 +3415,22 @@ components:
                     type: integer
                     format: int32
             description: 用户信息
+        api.rider.v1.ValidateInviteCodeReply:
+            type: object
+            properties:
+                isValid:
+                    type: boolean
+                inviterName:
+                    type: string
+                message:
+                    type: string
+            description: 验证邀请码响应
+        api.rider.v1.ValidateInviteCodeRequest:
+            type: object
+            properties:
+                inviteCode:
+                    type: string
+            description: 验证邀请码请求
         api.rider.v1.VerificationDetail:
             type: object
             properties:
@@ -1806,6 +3544,8 @@ tags:
       description: AI智能体客服服务
     - name: Auth
       description: 骑手认证服务
+    - name: DeactivationService
+      description: 骑手注销服务
     - name: Greeter
       description: The greeting service definition.
     - name: Income
@@ -1816,3 +3556,9 @@ tags:
       description: 订单服务
     - name: Qualification
       description: 骑手资质验证服务
+    - name: RatingService
+      description: 骑手评分服务
+    - name: Referral
+      description: 骑手拉新服务
+    - name: Ticket
+      description: 工单服务

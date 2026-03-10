@@ -1,0 +1,259 @@
+syntax = "proto3";
+
+package api.rider.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "validate/validate.proto";
+
+option go_package = "hellokratos/api/rider/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.rider.v1";
+
+// 骑手注销服务
+service DeactivationService {
+  // 申请注销
+  rpc ApplyDeactivation (ApplyDeactivationRequest) returns (ApplyDeactivationReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/deactivation/apply"
+      body: "*"
+    };
+  }
+
+  // 获取注销状态
+  rpc GetDeactivationStatus (GetDeactivationStatusRequest) returns (GetDeactivationStatusReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/deactivation/status"
+    };
+  }
+
+  // 取消注销申请
+  rpc CancelDeactivation (CancelDeactivationRequest) returns (CancelDeactivationReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/deactivation/cancel"
+      body: "*"
+    };
+  }
+
+  // 获取注销原因列表
+  rpc GetDeactivationReasons (GetDeactivationReasonsRequest) returns (GetDeactivationReasonsReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/deactivation/reasons"
+    };
+  }
+
+  // ==================== 管理员接口 ====================
+
+  // 获取注销申请列表
+  rpc GetDeactivationList (GetDeactivationListRequest) returns (GetDeactivationListReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/admin/deactivation/list"
+    };
+  }
+
+  // 审核注销申请
+  rpc ReviewDeactivation (ReviewDeactivationRequest) returns (ReviewDeactivationReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/admin/deactivation/review"
+      body: "*"
+    };
+  }
+
+  // 获取注销详情
+  rpc GetDeactivationDetail (GetDeactivationDetailRequest) returns (GetDeactivationDetailReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/admin/deactivation/detail/{deactivation_id}"
+    };
+  }
+
+  // 获取注销统计
+  rpc GetDeactivationStatistics (GetDeactivationStatisticsRequest) returns (GetDeactivationStatisticsReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/admin/deactivation/statistics"
+    };
+  }
+}
+
+// 注销原因类型
+enum DeactivationReason {
+  REASON_UNKNOWN = 0;
+  REASON_PERSONAL = 1;    // 个人原因
+  REASON_HEALTH = 2;      // 健康原因
+  REASON_OTHER_JOB = 3;   // 找到其他工作
+  REASON_INCOME = 4;      // 收入不满意
+  REASON_TIME = 5;        // 时间不合适
+  REASON_OTHER = 6;       // 其他原因
+}
+
+// 注销状态
+enum DeactivationStatus {
+  STATUS_UNKNOWN = 0;
+  STATUS_PENDING = 1;     // 待审核
+  STATUS_APPROVED = 2;    // 已批准
+  STATUS_REJECTED = 3;    // 已拒绝
+  STATUS_COMPLETED = 4;   // 已完成
+}
+
+// 申请注销请求
+message ApplyDeactivationRequest {
+  int64 rider_id = 1 [(validate.rules).int64.gt = 0];
+  DeactivationReason reason_type = 2 [(validate.rules).enum.defined_only = true];
+  string reason_detail = 3 [(validate.rules).string.max_len = 500];
+  string phone = 4 [(validate.rules).string.len = 11];
+  string ip = 5;
+  string device_id = 6;
+}
+
+// 申请注销响应
+message ApplyDeactivationReply {
+  int64 deactivation_id = 1;
+  DeactivationStatus status = 2;
+  DeactivationCheckResult checklist = 3;
+  string message = 4;
+}
+
+// 注销检查结果
+message DeactivationCheckResult {
+  bool can_deactivate = 1;
+  bool has_pending_orders = 2;
+  bool has_pending_income = 3;
+  bool has_pending_complaint = 4;
+  bool has_equipment_debt = 5;
+  bool has_violation_record = 6;
+  bool is_balance_clear = 7;
+  repeated string blocking_items = 8;
+}
+
+// 获取注销状态请求
+message GetDeactivationStatusRequest {
+  int64 rider_id = 1 [(validate.rules).int64.gt = 0];
+}
+
+// 获取注销状态响应
+message GetDeactivationStatusReply {
+  DeactivationInfo deactivation = 1;
+  DeactivationCheckResult checklist = 2;
+  CooldownInfo cooldown = 3;
+}
+
+// 注销信息
+message DeactivationInfo {
+  int64 id = 1;
+  int64 rider_id = 2;
+  DeactivationReason reason_type = 3;
+  string reason_detail = 4;
+  DeactivationStatus status = 5;
+  google.protobuf.Timestamp apply_time = 6;
+  google.protobuf.Timestamp review_time = 7;
+  int64 reviewer_id = 8;
+  string review_remark = 9;
+  google.protobuf.Timestamp complete_time = 10;
+  int32 clearance_status = 11;
+  int64 pending_income = 12;
+  int64 pending_penalty = 13;
+  int64 final_settlement = 14;
+}
+
+// 冷却期信息
+message CooldownInfo {
+  bool in_cooldown = 1;
+  google.protobuf.Timestamp cooldown_end_at = 2;
+  int32 deactivation_count = 3;
+  bool can_reactivate = 4;
+}
+
+// 取消注销请求
+message CancelDeactivationRequest {
+  int64 rider_id = 1 [(validate.rules).int64.gt = 0];
+  int64 deactivation_id = 2 [(validate.rules).int64.gt = 0];
+}
+
+// 取消注销响应
+message CancelDeactivationReply {
+  bool success = 1;
+  string message = 2;
+}
+
+// 获取注销原因列表请求
+message GetDeactivationReasonsRequest {}
+
+// 获取注销原因列表响应
+message GetDeactivationReasonsReply {
+  repeated ReasonItem reasons = 1;
+}
+
+// 原因项
+message ReasonItem {
+  DeactivationReason reason_type = 1;
+  string reason_name = 2;
+  string description = 3;
+}
+
+// ==================== 管理员接口消息 ====================
+
+// 获取注销申请列表请求
+message GetDeactivationListRequest {
+  DeactivationStatus status = 1;
+  int32 page = 2 [(validate.rules).int32.gt = 0];
+  int32 page_size = 3 [(validate.rules).int32 = {gt: 0, lte: 100}];
+}
+
+// 获取注销申请列表响应
+message GetDeactivationListReply {
+  repeated DeactivationInfo list = 1;
+  int64 total = 2;
+}
+
+// 审核注销请求
+message ReviewDeactivationRequest {
+  int64 deactivation_id = 1 [(validate.rules).int64.gt = 0];
+  int64 reviewer_id = 2 [(validate.rules).int64.gt = 0];
+  string action = 3 [(validate.rules).string = {in: ["APPROVE", "REJECT"]}];
+  string remark = 4 [(validate.rules).string.max_len = 500];
+}
+
+// 审核注销响应
+message ReviewDeactivationReply {
+  bool success = 1;
+  DeactivationStatus new_status = 2;
+  string message = 3;
+}
+
+// 获取注销详情请求
+message GetDeactivationDetailRequest {
+  int64 deactivation_id = 1 [(validate.rules).int64.gt = 0];
+}
+
+// 获取注销详情响应
+message GetDeactivationDetailReply {
+  DeactivationInfo deactivation = 1;
+  DeactivationCheckResult checklist = 2;
+  repeated DeactivationHistory history = 3;
+}
+
+// 注销历史
+message DeactivationHistory {
+  int64 id = 1;
+  string action = 2;
+  google.protobuf.Timestamp action_time = 3;
+  int64 operator_id = 4;
+  int32 operator_type = 5;
+  string remark = 6;
+}
+
+// 获取注销统计请求
+message GetDeactivationStatisticsRequest {
+  string start_date = 1 [(validate.rules).string.len = 8];  // YYYYMMDD
+  string end_date = 2 [(validate.rules).string.len = 8];    // YYYYMMDD
+}
+
+// 获取注销统计响应
+message GetDeactivationStatisticsReply {
+  int64 total_apply = 1;
+  int64 pending_count = 2;
+  int64 approved_count = 3;
+  int64 rejected_count = 4;
+  int64 completed_count = 5;
+  double avg_process_time = 6;  // 平均处理时间(小时)
+  int64 total_settlement = 7;   // 总结算金额(分)
+}

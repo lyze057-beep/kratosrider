@@ -1,6 +1,8 @@
 package data
 
 import (
+	"context"
+
 	"hellokratos/internal/conf"
 	"hellokratos/internal/data/sms"
 
@@ -52,6 +54,17 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 		return nil, nil, err
 	}
 	log.Info("database migrated successfully")
+
+	// 初始化拉新任务种子数据
+	seeder := NewReferralTaskSeeder(db)
+	if err := seeder.SeedTasks(context.Background()); err != nil {
+		log.Warn("failed to seed referral tasks", "err", err)
+	} else {
+		log.Info("referral tasks seeded successfully")
+	}
+	if err := seeder.SeedReferralStatistics(context.Background()); err != nil {
+		log.Warn("failed to seed referral statistics", "err", err)
+	}
 
 	// 初始化Redis客户端
 	rdb := NewRedisClient(c)
