@@ -36,3 +36,5 @@ bin/
 .vscode/
 .idea/
 *.swp
+#忽略敏感配置
+hellokratos/configs/
