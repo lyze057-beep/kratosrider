@@ -19,6 +19,8 @@ type AuthRepo interface {
 	GetUserByThirdParty(ctx context.Context, platform string, thirdPartyID string) (*model.User, error)
 	// UpdateUser 更新用户信息
 	UpdateUser(ctx context.Context, user *model.User) error
+	// GetUserByRiderID 根据骑手ID获取用户（用于位置服务）
+	GetUserByRiderID(ctx context.Context, riderID int64) (*model.User, error)
 }
 
 // authRepo 认证相关的数据访问实现
@@ -65,6 +67,16 @@ func (r *authRepo) UpdateUser(ctx context.Context, user *model.User) error {
 func (r *authRepo) GetUserByThirdParty(ctx context.Context, platform string, thirdPartyID string) (*model.User, error) {
 	var user model.User
 	err := r.db.WithContext(ctx).Where("third_party_platform = ? AND third_party_id = ?", platform, thirdPartyID).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+// GetUserByRiderID 根据骑手ID获取用户
+func (r *authRepo) GetUserByRiderID(ctx context.Context, riderID int64) (*model.User, error) {
+	var user model.User
+	err := r.db.WithContext(ctx).Where("id = ?", riderID).First(&user).Error
 	if err != nil {
 		return nil, err
 	}

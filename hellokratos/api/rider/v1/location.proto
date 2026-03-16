@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package api.rider.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "hellokratos/api/rider/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.api.helloworld.v1";
+option java_outer_classname = "RiderLocationProtoV1";
+
+// 位置服务
+service Location {
+  // 上报骑手位置
+  rpc UpdateLocation (UpdateLocationRequest) returns (UpdateLocationReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/location"
+      body: "*"
+    };
+  }
+  
+  // 获取骑手位置
+  rpc GetLocation (GetLocationRequest) returns (GetLocationReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/location/{rider_id}"
+    };
+  }
+  
+  // 获取附近骑手位置
+  rpc GetNearbyRiders (GetNearbyRidersRequest) returns (GetNearbyRidersReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/nearby_riders"
+    };
+  }
+}
+
+// 上报位置请求
+message UpdateLocationRequest {
+  int64 rider_id = 1;           // 骑手ID
+  double latitude = 2;          // 纬度
+  double longitude = 3;         // 经度
+  float accuracy = 4;           // 精度(米)
+  float speed = 5;              // 速度(km/h)
+  int32 direction = 6;          // 方向(0-360)
+  string address = 7;           // 地址
+  int64 timestamp = 8;          // 时间戳
+}
+
+// 上报位置响应
+message UpdateLocationReply {
+  bool success = 1;
+  string message = 2;
+}
+
+// 获取位置请求
+message GetLocationRequest {
+  int64 rider_id = 1;           // 骑手ID
+}
+
+// 获取位置响应
+message GetLocationReply {
+  LocationInfo location = 1;
+}
+
+// 位置信息
+message LocationInfo {
+  int64 rider_id = 1;
+  double latitude = 2;
+  double longitude = 3;
+  float accuracy = 4;
+  float speed = 5;
+  int32 direction = 6;
+  string address = 7;
+  string city = 8;
+  string province = 9;
+  string country = 10;
+  int64 updated_at = 11;
+}
+
+// 获取附近骑手请求
+message GetNearbyRidersRequest {
+  double latitude = 1;          // 中心点纬度
+  double longitude = 2;         // 中心点经度
+  int32 radius = 3;             // 搜索半径(米)
+  int32 limit = 4;              // 返回数量
+}
+
+// 获取附近骑手响应
+message GetNearbyRidersReply {
+  repeated LocationInfo riders = 1;
+}

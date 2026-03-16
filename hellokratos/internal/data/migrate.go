@@ -44,6 +44,9 @@ func AutoMigrate(db *gorm.DB) error {
 		&model.ReferralRewardRecord{},
 		&model.ReferralRiskLog{},
 		&model.ReferralStatistics{},
+		// 新增：骑手位置模块
+		&model.RiderLocation{},
+		&model.RiderLocationHistory{},
 	}
 
 	for _, m := range models {
@@ -79,18 +82,24 @@ func addIndexes(db *gorm.DB) error {
 		{"rider_order", "idx_order_rider_id", "rider_id"},
 		{"rider_order", "idx_order_status_rider_id", "status, rider_id"},
 		{"rider_order", "idx_order_created_at", "created_at"},
-		
+
 		// 用户表索引
 		{"rider_user", "idx_user_phone", "phone"},
 		{"rider_user", "idx_user_status", "status"},
 		{"rider_user", "idx_user_third_party", "third_party_platform, third_party_id"},
+
+		// 位置表索引
+		{"rider_location", "idx_location_rider_id", "rider_id"},
+		{"rider_location", "idx_location_updated_at", "updated_at"},
+		{"rider_location_history", "idx_history_rider_id", "rider_id"},
+		{"rider_location_history", "idx_history_created_at", "created_at"},
 	}
 
 	for _, idx := range indexes {
 		// 检查索引是否已存在
 		var count int64
 		db.Raw("SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = ? AND index_name = ?", idx.table, idx.name).Scan(&count)
-		
+
 		if count == 0 {
 			// 索引不存在，创建索引（使用字符串拼接，因为GORM不支持动态表名和列名）
 			sql := "CREATE INDEX " + idx.name + " ON " + idx.table + " (" + idx.column + ")"

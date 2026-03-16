@@ -1,0 +1,263 @@
+syntax = "proto3";
+
+package api.rider.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "hellokratos/api/rider/v1;v1";
+
+// 申诉服务
+service Appeal {
+  // 提交订单申诉
+  rpc SubmitOrderAppeal (SubmitOrderAppealRequest) returns (SubmitOrderAppealReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/appeal/order"
+      body: "*"
+    };
+  }
+
+  // 提交处罚申诉
+  rpc SubmitPenaltyAppeal (SubmitPenaltyAppealRequest) returns (SubmitPenaltyAppealReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/appeal/penalty"
+      body: "*"
+    };
+  }
+
+  // 获取申诉列表
+  rpc GetAppeals (GetAppealsRequest) returns (GetAppealsReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/appeals"
+    };
+  }
+
+  // 获取申诉详情
+  rpc GetAppealDetail (GetAppealDetailRequest) returns (GetAppealDetailReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/appeal/{appeal_id}"
+    };
+  }
+
+  // 取消申诉
+  rpc CancelAppeal (CancelAppealRequest) returns (CancelAppealReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/appeal/{appeal_id}/cancel"
+      body: "*"
+    };
+  }
+
+  // 获取申诉类型列表
+  rpc GetAppealTypes (GetAppealTypesRequest) returns (GetAppealTypesReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/appeal/types"
+    };
+  }
+
+  // 获取异常订单列表
+  rpc GetExceptionOrders (GetExceptionOrdersRequest) returns (GetExceptionOrdersReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/exception/orders"
+    };
+  }
+
+  // 提交异常报备
+  rpc SubmitExceptionReport (SubmitExceptionReportRequest) returns (SubmitExceptionReportReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/exception/report"
+      body: "*"
+    };
+  }
+}
+
+// 提交订单申诉请求
+message SubmitOrderAppealRequest {
+  int64 rider_id = 1;
+  int64 order_id = 2;
+  string appeal_type = 3;
+  string reason = 4;
+  string description = 5;
+  repeated string evidence_images = 6;
+  string contact_phone = 7;
+}
+
+// 提交订单申诉响应
+message SubmitOrderAppealReply {
+  bool success = 1;
+  string message = 2;
+  int64 appeal_id = 3;
+  string ticket_no = 4;
+}
+
+// 提交处罚申诉请求
+message SubmitPenaltyAppealRequest {
+  int64 rider_id = 1;
+  string penalty_type = 2;
+  string penalty_id = 3;
+  string appeal_type = 4;
+  string reason = 5;
+  string description = 6;
+  repeated string evidence_images = 7;
+  string contact_phone = 8;
+}
+
+// 提交处罚申诉响应
+message SubmitPenaltyAppealReply {
+  bool success = 1;
+  string message = 2;
+  int64 appeal_id = 3;
+  string ticket_no = 4;
+}
+
+// 获取申诉列表请求
+message GetAppealsRequest {
+  int64 rider_id = 1;
+  int32 status = 2;  // 0=全部, 1=待处理, 2=处理中, 3=已通过, 4=已驳回
+  string appeal_type = 3;
+  int32 page = 4;
+  int32 page_size = 5;
+}
+
+// 申诉信息
+message AppealInfo {
+  int64 appeal_id = 1;
+  string ticket_no = 2;
+  int32 appeal_type = 3;  // 1=订单申诉, 2=处罚申诉
+  string appeal_type_name = 4;
+  int64 order_id = 5;
+  string penalty_type = 6;
+  string reason = 7;
+  string description = 8;
+  int32 status = 9;  // 1=待处理, 2=处理中, 3=已通过, 4=已驳回
+  string status_name = 10;
+  string result = 11;
+  string reply = 12;
+  google.protobuf.Timestamp created_at = 13;
+  google.protobuf.Timestamp updated_at = 14;
+  google.protobuf.Timestamp resolved_at = 15;
+}
+
+// 获取申诉列表响应
+message GetAppealsReply {
+  bool success = 1;
+  string message = 2;
+  repeated AppealInfo appeals = 3;
+  int32 total = 4;
+  int32 page = 5;
+  int32 page_size = 6;
+}
+
+// 获取申诉详情请求
+message GetAppealDetailRequest {
+  int64 appeal_id = 1;
+  int64 rider_id = 2;
+}
+
+// 申诉详情
+message AppealDetail {
+  int64 appeal_id = 1;
+  string ticket_no = 2;
+  int32 appeal_type = 3;
+  string appeal_type_name = 4;
+  int64 order_id = 5;
+  string penalty_type = 6;
+  string penalty_id = 7;
+  string reason = 8;
+  string description = 9;
+  repeated string evidence_images = 10;
+  string contact_phone = 11;
+  int32 status = 12;
+  string status_name = 13;
+  string result = 14;
+  string reply = 15;
+  string handler_name = 16;
+  google.protobuf.Timestamp created_at = 17;
+  google.protobuf.Timestamp updated_at = 18;
+  google.protobuf.Timestamp resolved_at = 19;
+}
+
+// 获取申诉详情响应
+message GetAppealDetailReply {
+  bool success = 1;
+  string message = 2;
+  AppealDetail appeal = 3;
+}
+
+// 取消申诉请求
+message CancelAppealRequest {
+  int64 appeal_id = 1;
+  int64 rider_id = 2;
+  string cancel_reason = 3;
+}
+
+// 取消申诉响应
+message CancelAppealReply {
+  bool success = 1;
+  string message = 2;
+}
+
+// 申诉类型
+message AppealType {
+  string type_code = 1;
+  string type_name = 2;
+  string description = 3;
+  int32 sort_order = 4;
+}
+
+// 获取申诉类型列表请求
+message GetAppealTypesRequest {
+  int32 appeal_category = 1;  // 1=订单申诉, 2=处罚申诉
+}
+
+// 获取申诉类型列表响应
+message GetAppealTypesReply {
+  bool success = 1;
+  string message = 2;
+  repeated AppealType types = 3;
+}
+
+// 异常订单信息
+message ExceptionOrder {
+  int64 order_id = 1;
+  string order_no = 2;
+  string exception_type = 3;
+  string exception_desc = 4;
+  google.protobuf.Timestamp occurred_at = 5;
+  string status = 6;
+}
+
+// 获取异常订单列表请求
+message GetExceptionOrdersRequest {
+  int64 rider_id = 1;
+  string start_date = 2;
+  string end_date = 3;
+  int32 page = 4;
+  int32 page_size = 5;
+}
+
+// 获取异常订单列表响应
+message GetExceptionOrdersReply {
+  bool success = 1;
+  string message = 2;
+  repeated ExceptionOrder orders = 3;
+  int32 total = 4;
+}
+
+// 提交异常报备请求
+message SubmitExceptionReportRequest {
+  int64 rider_id = 1;
+  int64 order_id = 2;
+  string exception_type = 3;
+  string description = 4;
+  repeated string images = 5;
+  string location = 6;
+  double latitude = 7;
+  double longitude = 8;
+}
+
+// 提交异常报备响应
+message SubmitExceptionReportReply {
+  bool success = 1;
+  string message = 2;
+  int64 report_id = 3;
+}

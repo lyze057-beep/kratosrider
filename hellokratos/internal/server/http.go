@@ -14,7 +14,7 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, authService *service.AuthService, orderService *service.OrderService, messageService *service.MessageService, incomeService *service.IncomeService, aiAgentService *service.AIAgentService, qualificationService *service.QualificationService, referralService *service.ReferralService, logger log.Logger) *kratoshttp.Server {
+func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, authService *service.AuthService, orderService *service.OrderService, messageService *service.MessageService, incomeService *service.IncomeService, aiAgentService *service.AIAgentService, qualificationService *service.QualificationService, referralService *service.ReferralService, locationService *service.LocationService, appealService *service.AppealService, safetyService *service.SafetyService, logger log.Logger) *kratoshttp.Server {
 	var opts = []kratoshttp.ServerOption{
 		kratoshttp.Middleware(
 			recovery.Recovery(),
@@ -47,5 +47,11 @@ func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, authService 
 	riderV1.RegisterQualificationHTTPServer(srv, qualificationService)
 	// 新增：骑手拉新服务
 	riderV1.RegisterReferralHTTPServer(srv, referralService)
+	// 新增：骑手位置服务
+	riderV1.RegisterLocationHTTPServer(srv, locationService)
+	// 新增：申诉服务
+	riderV1.RegisterAppealHTTPServer(srv, appealService)
+	// 新增：安全服务
+	riderV1.RegisterSafetyHTTPServer(srv, safetyService)
 	return srv
 }

@@ -37,6 +37,11 @@ func wireApp(serverConfig *conf.Server, dataConfig *conf.Data, logger log.Logger
 	qualificationRepo := data.NewQualificationRepo(dataInstance)
 	// 新增：骑手拉新模块
 	referralRepo := data.NewReferralRepo(dataInstance)
+	locationRepo := data.NewLocationRepo(dataInstance)
+	// 新增：申诉模块
+	appealRepo := data.NewAppealRepo(dataInstance, logger)
+	// 新增：安全模块
+	safetyRepo := data.NewSafetyRepo(dataInstance, logger)
 	redisClient := data.NewRedisClient(dataConfig)
 	smsClient := data.NewHywxSMS(dataConfig)
 	orderMessageProducer := data.NewOrderMessageProducer(dataInstance, logger)
@@ -89,6 +94,12 @@ func wireApp(serverConfig *conf.Server, dataConfig *conf.Data, logger log.Logger
 	qualificationUsecase := biz.NewQualificationUsecase(qualificationRepo, logger)
 	// 新增：骑手拉新模块
 	referralUsecase := biz.NewReferralUsecase(referralRepo, logger, dataConfig)
+	// 新增：骑手位置模块
+	locationUsecase := biz.NewLocationUsecase(locationRepo, redisClient, logger)
+	// 新增：申诉模块
+	appealUsecase := biz.NewAppealUsecase(appealRepo, orderRepo, logger)
+	// 新增：安全模块
+	safetyUsecase := biz.NewSafetyUsecase(safetyRepo, orderRepo, logger)
 
 	greeterService := service.NewGreeterService(greeterUsecase)
 	authService := service.NewAuthService(authUsecase, logger)
@@ -100,9 +111,14 @@ func wireApp(serverConfig *conf.Server, dataConfig *conf.Data, logger log.Logger
 	qualificationService := service.NewQualificationService(qualificationUsecase, logger)
 	// 新增：骑手拉新服务
 	referralService := service.NewReferralService(referralUsecase)
+	locationService := service.NewLocationService(locationUsecase, logger)
+	// 新增：申诉服务
+	appealService := service.NewAppealService(appealUsecase, logger)
+	// 新增：安全服务
+	safetyService := service.NewSafetyService(safetyUsecase, logger)
 
-	grpcServer := server.NewGRPCServer(serverConfig, greeterService, authService, orderService, messageService, incomeService, aiAgentService, qualificationService, referralService, logger)
-	httpServer := server.NewHTTPServer(serverConfig, greeterService, authService, orderService, messageService, incomeService, aiAgentService, qualificationService, referralService, logger)
+	grpcServer := server.NewGRPCServer(serverConfig, greeterService, authService, orderService, messageService, incomeService, aiAgentService, qualificationService, referralService, locationService, appealService, safetyService, logger)
+	httpServer := server.NewHTTPServer(serverConfig, greeterService, authService, orderService, messageService, incomeService, aiAgentService, qualificationService, referralService, locationService, appealService, safetyService, logger)
 
 	// 启动订单消息消费者
 	if err := orderMessageConsumer.StartConsuming(context.Background()); err != nil {

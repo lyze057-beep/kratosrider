@@ -1,0 +1,370 @@
+syntax = "proto3";
+
+package api.rider.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "hellokratos/api/rider/v1;v1";
+
+// 安全服务
+service Safety {
+  // 发起紧急求助
+  rpc EmergencyHelp (EmergencyHelpRequest) returns (EmergencyHelpReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/safety/emergency"
+      body: "*"
+    };
+  }
+
+  // 取消紧急求助
+  rpc CancelEmergency (CancelEmergencyRequest) returns (CancelEmergencyReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/safety/emergency/{emergency_id}/cancel"
+      body: "*"
+    };
+  }
+
+  // 获取紧急求助记录
+  rpc GetEmergencyRecords (GetEmergencyRecordsRequest) returns (GetEmergencyRecordsReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/safety/emergency/records"
+    };
+  }
+
+  // 提交保险理赔申请
+  rpc SubmitInsuranceClaim (SubmitInsuranceClaimRequest) returns (SubmitInsuranceClaimReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/safety/insurance/claim"
+      body: "*"
+    };
+  }
+
+  // 获取保险理赔列表
+  rpc GetInsuranceClaims (GetInsuranceClaimsRequest) returns (GetInsuranceClaimsReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/safety/insurance/claims"
+    };
+  }
+
+  // 获取保险理赔详情
+  rpc GetInsuranceClaimDetail (GetInsuranceClaimDetailRequest) returns (GetInsuranceClaimDetailReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/safety/insurance/claim/{claim_id}"
+    };
+  }
+
+  // 获取保险信息
+  rpc GetInsuranceInfo (GetInsuranceInfoRequest) returns (GetInsuranceInfoReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/safety/insurance/info"
+    };
+  }
+
+  // 上报安全事件
+  rpc ReportSafetyEvent (ReportSafetyEventRequest) returns (ReportSafetyEventReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/safety/event"
+      body: "*"
+    };
+  }
+
+  // 获取安全提示
+  rpc GetSafetyTips (GetSafetyTipsRequest) returns (GetSafetyTipsReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/safety/tips"
+    };
+  }
+
+  // 更新紧急联系人
+  rpc UpdateEmergencyContacts (UpdateEmergencyContactsRequest) returns (UpdateEmergencyContactsReply) {
+    option (google.api.http) = {
+      post: "/rider/v1/safety/contacts"
+      body: "*"
+    };
+  }
+
+  // 获取紧急联系人
+  rpc GetEmergencyContacts (GetEmergencyContactsRequest) returns (GetEmergencyContactsReply) {
+    option (google.api.http) = {
+      get: "/rider/v1/safety/contacts"
+    };
+  }
+}
+
+// 紧急联系人
+message EmergencyContact {
+  int64 id = 1;
+  string name = 2;
+  string phone = 3;
+  string relation = 4;
+  bool is_primary = 5;
+}
+
+// 发起紧急求助请求
+message EmergencyHelpRequest {
+  int64 rider_id = 1;
+  int64 order_id = 2;
+  string help_type = 3;  // accident=事故, illness=疾病, danger=危险, other=其他
+  string description = 4;
+  double latitude = 5;
+  double longitude = 6;
+  string address = 7;
+  repeated string images = 8;
+}
+
+// 发起紧急求助响应
+message EmergencyHelpReply {
+  bool success = 1;
+  string message = 2;
+  int64 emergency_id = 3;
+  string ticket_no = 4;
+}
+
+// 取消紧急求助请求
+message CancelEmergencyRequest {
+  int64 emergency_id = 1;
+  int64 rider_id = 2;
+  string cancel_reason = 3;
+}
+
+// 取消紧急求助响应
+message CancelEmergencyReply {
+  bool success = 1;
+  string message = 2;
+}
+
+// 紧急求助记录
+message EmergencyRecord {
+  int64 emergency_id = 1;
+  string ticket_no = 2;
+  string help_type = 3;
+  string help_type_name = 4;
+  string description = 5;
+  double latitude = 6;
+  double longitude = 7;
+  string address = 8;
+  int32 status = 9;  // 1=处理中, 2=已响应, 3=已处理, 4=已取消
+  string status_name = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp resolved_at = 12;
+  string handler_name = 13;
+  string result = 14;
+}
+
+// 获取紧急求助记录请求
+message GetEmergencyRecordsRequest {
+  int64 rider_id = 1;
+  int32 status = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// 获取紧急求助记录响应
+message GetEmergencyRecordsReply {
+  bool success = 1;
+  string message = 2;
+  repeated EmergencyRecord records = 3;
+  int32 total = 4;
+}
+
+// 提交保险理赔申请请求
+message SubmitInsuranceClaimRequest {
+  int64 rider_id = 1;
+  int64 order_id = 2;
+  string incident_type = 3;  // accident=意外事故, injury=人身伤害, third_party=第三方责任
+  google.protobuf.Timestamp incident_time = 4;
+  string incident_location = 5;
+  double latitude = 6;
+  double longitude = 7;
+  string incident_desc = 8;
+  string injury_situation = 9;
+  string medical_expense = 10;
+  repeated string evidence_images = 11;
+  repeated string medical_records = 12;
+  string contact_name = 13;
+  string contact_phone = 14;
+  string bank_name = 15;
+  string bank_account = 16;
+  string account_name = 17;
+}
+
+// 提交保险理赔申请响应
+message SubmitInsuranceClaimReply {
+  bool success = 1;
+  string message = 2;
+  int64 claim_id = 3;
+  string claim_no = 4;
+}
+
+// 保险理赔信息
+message InsuranceClaimInfo {
+  int64 claim_id = 1;
+  string claim_no = 2;
+  string incident_type = 3;
+  string incident_type_name = 4;
+  google.protobuf.Timestamp incident_time = 5;
+  string incident_location = 6;
+  int32 status = 7;  // 1=待审核, 2=审核中, 3=已通过, 4=已拒绝, 5=已赔付
+  string status_name = 8;
+  string claim_amount = 9;
+  string paid_amount = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+}
+
+// 获取保险理赔列表请求
+message GetInsuranceClaimsRequest {
+  int64 rider_id = 1;
+  int32 status = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// 获取保险理赔列表响应
+message GetInsuranceClaimsReply {
+  bool success = 1;
+  string message = 2;
+  repeated InsuranceClaimInfo claims = 3;
+  int32 total = 4;
+}
+
+// 获取保险理赔详情请求
+message GetInsuranceClaimDetailRequest {
+  int64 claim_id = 1;
+  int64 rider_id = 2;
+}
+
+// 保险理赔详情
+message InsuranceClaimDetail {
+  int64 claim_id = 1;
+  string claim_no = 2;
+  int64 order_id = 3;
+  string incident_type = 4;
+  string incident_type_name = 5;
+  google.protobuf.Timestamp incident_time = 6;
+  string incident_location = 7;
+  double latitude = 8;
+  double longitude = 9;
+  string incident_desc = 10;
+  string injury_situation = 11;
+  string medical_expense = 12;
+  repeated string evidence_images = 13;
+  repeated string medical_records = 14;
+  string contact_name = 15;
+  string contact_phone = 16;
+  string bank_name = 17;
+  string bank_account = 18;
+  string account_name = 19;
+  int32 status = 20;
+  string status_name = 21;
+  string claim_amount = 22;
+  string paid_amount = 23;
+  string reject_reason = 24;
+  string handler_name = 25;
+  string remark = 26;
+  google.protobuf.Timestamp created_at = 27;
+  google.protobuf.Timestamp updated_at = 28;
+  google.protobuf.Timestamp paid_at = 29;
+}
+
+// 获取保险理赔详情响应
+message GetInsuranceClaimDetailReply {
+  bool success = 1;
+  string message = 2;
+  InsuranceClaimDetail claim = 3;
+}
+
+// 保险信息
+message InsuranceInfo {
+  string insurance_no = 1;
+  string insurance_type = 2;
+  string coverage_desc = 3;
+  string coverage_amount = 4;
+  google.protobuf.Timestamp effective_date = 5;
+  google.protobuf.Timestamp expire_date = 6;
+  string status = 7;
+  int32 claim_count = 8;
+  string total_claim_amount = 9;
+}
+
+// 获取保险信息请求
+message GetInsuranceInfoRequest {
+  int64 rider_id = 1;
+}
+
+// 获取保险信息响应
+message GetInsuranceInfoReply {
+  bool success = 1;
+  string message = 2;
+  InsuranceInfo info = 3;
+}
+
+// 上报安全事件请求
+message ReportSafetyEventRequest {
+  int64 rider_id = 1;
+  int64 order_id = 2;
+  string event_type = 3;  // traffic_accident=交通事故, dispute=纠纷冲突, dangerous_road=道路危险, weather=恶劣天气, other=其他
+  string description = 4;
+  double latitude = 5;
+  double longitude = 6;
+  string address = 7;
+  repeated string images = 8;
+  bool need_help = 9;
+}
+
+// 上报安全事件响应
+message ReportSafetyEventReply {
+  bool success = 1;
+  string message = 2;
+  int64 event_id = 3;
+}
+
+// 安全提示
+message SafetyTip {
+  int64 id = 1;
+  string title = 2;
+  string content = 3;
+  string tip_type = 4;
+  int32 priority = 5;
+  google.protobuf.Timestamp publish_time = 6;
+}
+
+// 获取安全提示请求
+message GetSafetyTipsRequest {
+  string tip_type = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+
+// 获取安全提示响应
+message GetSafetyTipsReply {
+  bool success = 1;
+  string message = 2;
+  repeated SafetyTip tips = 3;
+  int32 total = 4;
+}
+
+// 更新紧急联系人请求
+message UpdateEmergencyContactsRequest {
+  int64 rider_id = 1;
+  repeated EmergencyContact contacts = 2;
+}
+
+// 更新紧急联系人响应
+message UpdateEmergencyContactsReply {
+  bool success = 1;
+  string message = 2;
+}
+
+// 获取紧急联系人请求
+message GetEmergencyContactsRequest {
+  int64 rider_id = 1;
+}
+
+// 获取紧急联系人响应
+message GetEmergencyContactsReply {
+  bool success = 1;
+  string message = 2;
+  repeated EmergencyContact contacts = 3;
+}

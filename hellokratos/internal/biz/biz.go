@@ -17,6 +17,7 @@ var ProviderSet = wire.NewSet(
 	NewTicketUseCase,
 	NewVectorDBService,
 	NewLLMService,
+	NewLocationUsecase,
 	ai.NewOCRService,
 	ai.NewASRService,
 )

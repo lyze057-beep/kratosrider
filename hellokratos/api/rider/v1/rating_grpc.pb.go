@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.4.0
 // - protoc             v3.19.4
-// source: rider/v1/rating.proto
+// source: api/rider/v1/rating.proto
 
 package v1
 
@@ -19,458 +19,258 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	RatingService_SubmitRating_FullMethodName        = "/api.rider.v1.RatingService/SubmitRating"
-	RatingService_GetRiderRating_FullMethodName      = "/api.rider.v1.RatingService/GetRiderRating"
-	RatingService_GetRatingRecords_FullMethodName    = "/api.rider.v1.RatingService/GetRatingRecords"
-	RatingService_GetRatingDetail_FullMethodName     = "/api.rider.v1.RatingService/GetRatingDetail"
-	RatingService_ReplyToRating_FullMethodName       = "/api.rider.v1.RatingService/ReplyToRating"
-	RatingService_GetRatingSummary_FullMethodName    = "/api.rider.v1.RatingService/GetRatingSummary"
-	RatingService_GetRatingList_FullMethodName       = "/api.rider.v1.RatingService/GetRatingList"
-	RatingService_HideRating_FullMethodName          = "/api.rider.v1.RatingService/HideRating"
-	RatingService_GetRatingStatistics_FullMethodName = "/api.rider.v1.RatingService/GetRatingStatistics"
-	RatingService_RecalculateRating_FullMethodName   = "/api.rider.v1.RatingService/RecalculateRating"
+	Rating_SubmitOrderRating_FullMethodName   = "/api.rider.v1.Rating/SubmitOrderRating"
+	Rating_GetRiderRatings_FullMethodName     = "/api.rider.v1.Rating/GetRiderRatings"
+	Rating_GetRiderRatingStats_FullMethodName = "/api.rider.v1.Rating/GetRiderRatingStats"
+	Rating_SubmitComplaint_FullMethodName     = "/api.rider.v1.Rating/SubmitComplaint"
+	Rating_GetComplaints_FullMethodName       = "/api.rider.v1.Rating/GetComplaints"
 )
 
-// RatingServiceClient is the client API for RatingService service.
+// RatingClient is the client API for Rating service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// 骑手评分服务
-type RatingServiceClient interface {
-	// 提交评分
-	SubmitRating(ctx context.Context, in *SubmitRatingRequest, opts ...grpc.CallOption) (*SubmitRatingReply, error)
-	// 获取骑手评分
-	GetRiderRating(ctx context.Context, in *GetRiderRatingRequest, opts ...grpc.CallOption) (*GetRiderRatingReply, error)
-	// 获取评分记录列表
-	GetRatingRecords(ctx context.Context, in *GetRatingRecordsRequest, opts ...grpc.CallOption) (*GetRatingRecordsReply, error)
-	// 获取评分详情
-	GetRatingDetail(ctx context.Context, in *GetRatingDetailRequest, opts ...grpc.CallOption) (*GetRatingDetailReply, error)
-	// 回复评价
-	ReplyToRating(ctx context.Context, in *ReplyToRatingRequest, opts ...grpc.CallOption) (*ReplyToRatingReply, error)
-	// 获取评分汇总
-	GetRatingSummary(ctx context.Context, in *GetRatingSummaryRequest, opts ...grpc.CallOption) (*GetRatingSummaryReply, error)
-	// 获取评分列表
-	GetRatingList(ctx context.Context, in *GetRatingListRequest, opts ...grpc.CallOption) (*GetRatingListReply, error)
-	// 隐藏评分
-	HideRating(ctx context.Context, in *HideRatingRequest, opts ...grpc.CallOption) (*HideRatingReply, error)
-	// 获取评分统计
-	GetRatingStatistics(ctx context.Context, in *GetRatingStatisticsRequest, opts ...grpc.CallOption) (*GetRatingStatisticsReply, error)
-	// 重新计算评分
-	RecalculateRating(ctx context.Context, in *RecalculateRatingRequest, opts ...grpc.CallOption) (*RecalculateRatingReply, error)
+// 评价服务
+type RatingClient interface {
+	// 提交订单评价
+	SubmitOrderRating(ctx context.Context, in *SubmitOrderRatingRequest, opts ...grpc.CallOption) (*SubmitOrderRatingReply, error)
+	// 获取骑手评价列表
+	GetRiderRatings(ctx context.Context, in *GetRiderRatingsRequest, opts ...grpc.CallOption) (*GetRiderRatingsReply, error)
+	// 获取骑手评分统计
+	GetRiderRatingStats(ctx context.Context, in *GetRiderRatingStatsRequest, opts ...grpc.CallOption) (*GetRiderRatingStatsReply, error)
+	// 提交投诉
+	SubmitComplaint(ctx context.Context, in *SubmitComplaintRequest, opts ...grpc.CallOption) (*SubmitComplaintReply, error)
+	// 获取投诉列表
+	GetComplaints(ctx context.Context, in *GetComplaintsRequest, opts ...grpc.CallOption) (*GetComplaintsReply, error)
 }
 
-type ratingServiceClient struct {
+type ratingClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewRatingServiceClient(cc grpc.ClientConnInterface) RatingServiceClient {
-	return &ratingServiceClient{cc}
+func NewRatingClient(cc grpc.ClientConnInterface) RatingClient {
+	return &ratingClient{cc}
 }
 
-func (c *ratingServiceClient) SubmitRating(ctx context.Context, in *SubmitRatingRequest, opts ...grpc.CallOption) (*SubmitRatingReply, error) {
+func (c *ratingClient) SubmitOrderRating(ctx context.Context, in *SubmitOrderRatingRequest, opts ...grpc.CallOption) (*SubmitOrderRatingReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SubmitRatingReply)
-	err := c.cc.Invoke(ctx, RatingService_SubmitRating_FullMethodName, in, out, cOpts...)
+	out := new(SubmitOrderRatingReply)
+	err := c.cc.Invoke(ctx, Rating_SubmitOrderRating_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *ratingServiceClient) GetRiderRating(ctx context.Context, in *GetRiderRatingRequest, opts ...grpc.CallOption) (*GetRiderRatingReply, error) {
+func (c *ratingClient) GetRiderRatings(ctx context.Context, in *GetRiderRatingsRequest, opts ...grpc.CallOption) (*GetRiderRatingsReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetRiderRatingReply)
-	err := c.cc.Invoke(ctx, RatingService_GetRiderRating_FullMethodName, in, out, cOpts...)
+	out := new(GetRiderRatingsReply)
+	err := c.cc.Invoke(ctx, Rating_GetRiderRatings_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *ratingServiceClient) GetRatingRecords(ctx context.Context, in *GetRatingRecordsRequest, opts ...grpc.CallOption) (*GetRatingRecordsReply, error) {
+func (c *ratingClient) GetRiderRatingStats(ctx context.Context, in *GetRiderRatingStatsRequest, opts ...grpc.CallOption) (*GetRiderRatingStatsReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetRatingRecordsReply)
-	err := c.cc.Invoke(ctx, RatingService_GetRatingRecords_FullMethodName, in, out, cOpts...)
+	out := new(GetRiderRatingStatsReply)
+	err := c.cc.Invoke(ctx, Rating_GetRiderRatingStats_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *ratingServiceClient) GetRatingDetail(ctx context.Context, in *GetRatingDetailRequest, opts ...grpc.CallOption) (*GetRatingDetailReply, error) {
+func (c *ratingClient) SubmitComplaint(ctx context.Context, in *SubmitComplaintRequest, opts ...grpc.CallOption) (*SubmitComplaintReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetRatingDetailReply)
-	err := c.cc.Invoke(ctx, RatingService_GetRatingDetail_FullMethodName, in, out, cOpts...)
+	out := new(SubmitComplaintReply)
+	err := c.cc.Invoke(ctx, Rating_SubmitComplaint_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *ratingServiceClient) ReplyToRating(ctx context.Context, in *ReplyToRatingRequest, opts ...grpc.CallOption) (*ReplyToRatingReply, error) {
+func (c *ratingClient) GetComplaints(ctx context.Context, in *GetComplaintsRequest, opts ...grpc.CallOption) (*GetComplaintsReply, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ReplyToRatingReply)
-	err := c.cc.Invoke(ctx, RatingService_ReplyToRating_FullMethodName, in, out, cOpts...)
+	out := new(GetComplaintsReply)
+	err := c.cc.Invoke(ctx, Rating_GetComplaints_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *ratingServiceClient) GetRatingSummary(ctx context.Context, in *GetRatingSummaryRequest, opts ...grpc.CallOption) (*GetRatingSummaryReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetRatingSummaryReply)
-	err := c.cc.Invoke(ctx, RatingService_GetRatingSummary_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *ratingServiceClient) GetRatingList(ctx context.Context, in *GetRatingListRequest, opts ...grpc.CallOption) (*GetRatingListReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetRatingListReply)
-	err := c.cc.Invoke(ctx, RatingService_GetRatingList_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *ratingServiceClient) HideRating(ctx context.Context, in *HideRatingRequest, opts ...grpc.CallOption) (*HideRatingReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(HideRatingReply)
-	err := c.cc.Invoke(ctx, RatingService_HideRating_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *ratingServiceClient) GetRatingStatistics(ctx context.Context, in *GetRatingStatisticsRequest, opts ...grpc.CallOption) (*GetRatingStatisticsReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetRatingStatisticsReply)
-	err := c.cc.Invoke(ctx, RatingService_GetRatingStatistics_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *ratingServiceClient) RecalculateRating(ctx context.Context, in *RecalculateRatingRequest, opts ...grpc.CallOption) (*RecalculateRatingReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RecalculateRatingReply)
-	err := c.cc.Invoke(ctx, RatingService_RecalculateRating_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// RatingServiceServer is the server API for RatingService service.
-// All implementations must embed UnimplementedRatingServiceServer
+// RatingServer is the server API for Rating service.
+// All implementations must embed UnimplementedRatingServer
 // for forward compatibility
 //
-// 骑手评分服务
-type RatingServiceServer interface {
-	// 提交评分
-	SubmitRating(context.Context, *SubmitRatingRequest) (*SubmitRatingReply, error)
-	// 获取骑手评分
-	GetRiderRating(context.Context, *GetRiderRatingRequest) (*GetRiderRatingReply, error)
-	// 获取评分记录列表
-	GetRatingRecords(context.Context, *GetRatingRecordsRequest) (*GetRatingRecordsReply, error)
-	// 获取评分详情
-	GetRatingDetail(context.Context, *GetRatingDetailRequest) (*GetRatingDetailReply, error)
-	// 回复评价
-	ReplyToRating(context.Context, *ReplyToRatingRequest) (*ReplyToRatingReply, error)
-	// 获取评分汇总
-	GetRatingSummary(context.Context, *GetRatingSummaryRequest) (*GetRatingSummaryReply, error)
-	// 获取评分列表
-	GetRatingList(context.Context, *GetRatingListRequest) (*GetRatingListReply, error)
-	// 隐藏评分
-	HideRating(context.Context, *HideRatingRequest) (*HideRatingReply, error)
-	// 获取评分统计
-	GetRatingStatistics(context.Context, *GetRatingStatisticsRequest) (*GetRatingStatisticsReply, error)
-	// 重新计算评分
-	RecalculateRating(context.Context, *RecalculateRatingRequest) (*RecalculateRatingReply, error)
-	mustEmbedUnimplementedRatingServiceServer()
+// 评价服务
+type RatingServer interface {
+	// 提交订单评价
+	SubmitOrderRating(context.Context, *SubmitOrderRatingRequest) (*SubmitOrderRatingReply, error)
+	// 获取骑手评价列表
+	GetRiderRatings(context.Context, *GetRiderRatingsRequest) (*GetRiderRatingsReply, error)
+	// 获取骑手评分统计
+	GetRiderRatingStats(context.Context, *GetRiderRatingStatsRequest) (*GetRiderRatingStatsReply, error)
+	// 提交投诉
+	SubmitComplaint(context.Context, *SubmitComplaintRequest) (*SubmitComplaintReply, error)
+	// 获取投诉列表
+	GetComplaints(context.Context, *GetComplaintsRequest) (*GetComplaintsReply, error)
+	mustEmbedUnimplementedRatingServer()
 }
 
-// UnimplementedRatingServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedRatingServiceServer struct {
+// UnimplementedRatingServer must be embedded to have forward compatible implementations.
+type UnimplementedRatingServer struct {
 }
 
-func (UnimplementedRatingServiceServer) SubmitRating(context.Context, *SubmitRatingRequest) (*SubmitRatingReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SubmitRating not implemented")
+func (UnimplementedRatingServer) SubmitOrderRating(context.Context, *SubmitOrderRatingRequest) (*SubmitOrderRatingReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SubmitOrderRating not implemented")
 }
-func (UnimplementedRatingServiceServer) GetRiderRating(context.Context, *GetRiderRatingRequest) (*GetRiderRatingReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRiderRating not implemented")
+func (UnimplementedRatingServer) GetRiderRatings(context.Context, *GetRiderRatingsRequest) (*GetRiderRatingsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRiderRatings not implemented")
 }
-func (UnimplementedRatingServiceServer) GetRatingRecords(context.Context, *GetRatingRecordsRequest) (*GetRatingRecordsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRatingRecords not implemented")
+func (UnimplementedRatingServer) GetRiderRatingStats(context.Context, *GetRiderRatingStatsRequest) (*GetRiderRatingStatsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRiderRatingStats not implemented")
 }
-func (UnimplementedRatingServiceServer) GetRatingDetail(context.Context, *GetRatingDetailRequest) (*GetRatingDetailReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRatingDetail not implemented")
+func (UnimplementedRatingServer) SubmitComplaint(context.Context, *SubmitComplaintRequest) (*SubmitComplaintReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SubmitComplaint not implemented")
 }
-func (UnimplementedRatingServiceServer) ReplyToRating(context.Context, *ReplyToRatingRequest) (*ReplyToRatingReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReplyToRating not implemented")
+func (UnimplementedRatingServer) GetComplaints(context.Context, *GetComplaintsRequest) (*GetComplaintsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetComplaints not implemented")
 }
-func (UnimplementedRatingServiceServer) GetRatingSummary(context.Context, *GetRatingSummaryRequest) (*GetRatingSummaryReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRatingSummary not implemented")
-}
-func (UnimplementedRatingServiceServer) GetRatingList(context.Context, *GetRatingListRequest) (*GetRatingListReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRatingList not implemented")
-}
-func (UnimplementedRatingServiceServer) HideRating(context.Context, *HideRatingRequest) (*HideRatingReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method HideRating not implemented")
-}
-func (UnimplementedRatingServiceServer) GetRatingStatistics(context.Context, *GetRatingStatisticsRequest) (*GetRatingStatisticsReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetRatingStatistics not implemented")
-}
-func (UnimplementedRatingServiceServer) RecalculateRating(context.Context, *RecalculateRatingRequest) (*RecalculateRatingReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RecalculateRating not implemented")
-}
-func (UnimplementedRatingServiceServer) mustEmbedUnimplementedRatingServiceServer() {}
+func (UnimplementedRatingServer) mustEmbedUnimplementedRatingServer() {}
 
-// UnsafeRatingServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to RatingServiceServer will
+// UnsafeRatingServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to RatingServer will
 // result in compilation errors.
-type UnsafeRatingServiceServer interface {
-	mustEmbedUnimplementedRatingServiceServer()
+type UnsafeRatingServer interface {
+	mustEmbedUnimplementedRatingServer()
 }
 
-func RegisterRatingServiceServer(s grpc.ServiceRegistrar, srv RatingServiceServer) {
-	s.RegisterService(&RatingService_ServiceDesc, srv)
+func RegisterRatingServer(s grpc.ServiceRegistrar, srv RatingServer) {
+	s.RegisterService(&Rating_ServiceDesc, srv)
 }
 
-func _RatingService_SubmitRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SubmitRatingRequest)
+func _Rating_SubmitOrderRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SubmitOrderRatingRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RatingServiceServer).SubmitRating(ctx, in)
+		return srv.(RatingServer).SubmitOrderRating(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RatingService_SubmitRating_FullMethodName,
+		FullMethod: Rating_SubmitOrderRating_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RatingServiceServer).SubmitRating(ctx, req.(*SubmitRatingRequest))
+		return srv.(RatingServer).SubmitOrderRating(ctx, req.(*SubmitOrderRatingRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RatingService_GetRiderRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRiderRatingRequest)
+func _Rating_GetRiderRatings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRiderRatingsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RatingServiceServer).GetRiderRating(ctx, in)
+		return srv.(RatingServer).GetRiderRatings(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RatingService_GetRiderRating_FullMethodName,
+		FullMethod: Rating_GetRiderRatings_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RatingServiceServer).GetRiderRating(ctx, req.(*GetRiderRatingRequest))
+		return srv.(RatingServer).GetRiderRatings(ctx, req.(*GetRiderRatingsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RatingService_GetRatingRecords_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRatingRecordsRequest)
+func _Rating_GetRiderRatingStats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRiderRatingStatsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RatingServiceServer).GetRatingRecords(ctx, in)
+		return srv.(RatingServer).GetRiderRatingStats(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RatingService_GetRatingRecords_FullMethodName,
+		FullMethod: Rating_GetRiderRatingStats_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RatingServiceServer).GetRatingRecords(ctx, req.(*GetRatingRecordsRequest))
+		return srv.(RatingServer).GetRiderRatingStats(ctx, req.(*GetRiderRatingStatsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RatingService_GetRatingDetail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRatingDetailRequest)
+func _Rating_SubmitComplaint_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SubmitComplaintRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RatingServiceServer).GetRatingDetail(ctx, in)
+		return srv.(RatingServer).SubmitComplaint(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RatingService_GetRatingDetail_FullMethodName,
+		FullMethod: Rating_SubmitComplaint_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RatingServiceServer).GetRatingDetail(ctx, req.(*GetRatingDetailRequest))
+		return srv.(RatingServer).SubmitComplaint(ctx, req.(*SubmitComplaintRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RatingService_ReplyToRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReplyToRatingRequest)
+func _Rating_GetComplaints_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetComplaintsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RatingServiceServer).ReplyToRating(ctx, in)
+		return srv.(RatingServer).GetComplaints(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RatingService_ReplyToRating_FullMethodName,
+		FullMethod: Rating_GetComplaints_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RatingServiceServer).ReplyToRating(ctx, req.(*ReplyToRatingRequest))
+		return srv.(RatingServer).GetComplaints(ctx, req.(*GetComplaintsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RatingService_GetRatingSummary_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRatingSummaryRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RatingServiceServer).GetRatingSummary(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: RatingService_GetRatingSummary_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RatingServiceServer).GetRatingSummary(ctx, req.(*GetRatingSummaryRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RatingService_GetRatingList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRatingListRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RatingServiceServer).GetRatingList(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: RatingService_GetRatingList_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RatingServiceServer).GetRatingList(ctx, req.(*GetRatingListRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RatingService_HideRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HideRatingRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RatingServiceServer).HideRating(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: RatingService_HideRating_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RatingServiceServer).HideRating(ctx, req.(*HideRatingRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RatingService_GetRatingStatistics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRatingStatisticsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RatingServiceServer).GetRatingStatistics(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: RatingService_GetRatingStatistics_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RatingServiceServer).GetRatingStatistics(ctx, req.(*GetRatingStatisticsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RatingService_RecalculateRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RecalculateRatingRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RatingServiceServer).RecalculateRating(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: RatingService_RecalculateRating_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RatingServiceServer).RecalculateRating(ctx, req.(*RecalculateRatingRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// RatingService_ServiceDesc is the grpc.ServiceDesc for RatingService service.
+// Rating_ServiceDesc is the grpc.ServiceDesc for Rating service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var RatingService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "api.rider.v1.RatingService",
-	HandlerType: (*RatingServiceServer)(nil),
+var Rating_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "api.rider.v1.Rating",
+	HandlerType: (*RatingServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SubmitRating",
-			Handler:    _RatingService_SubmitRating_Handler,
+			MethodName: "SubmitOrderRating",
+			Handler:    _Rating_SubmitOrderRating_Handler,
 		},
 		{
-			MethodName: "GetRiderRating",
-			Handler:    _RatingService_GetRiderRating_Handler,
+			MethodName: "GetRiderRatings",
+			Handler:    _Rating_GetRiderRatings_Handler,
 		},
 		{
-			MethodName: "GetRatingRecords",
-			Handler:    _RatingService_GetRatingRecords_Handler,
+			MethodName: "GetRiderRatingStats",
+			Handler:    _Rating_GetRiderRatingStats_Handler,
 		},
 		{
-			MethodName: "GetRatingDetail",
-			Handler:    _RatingService_GetRatingDetail_Handler,
+			MethodName: "SubmitComplaint",
+			Handler:    _Rating_SubmitComplaint_Handler,
 		},
 		{
-			MethodName: "ReplyToRating",
-			Handler:    _RatingService_ReplyToRating_Handler,
-		},
-		{
-			MethodName: "GetRatingSummary",
-			Handler:    _RatingService_GetRatingSummary_Handler,
-		},
-		{
-			MethodName: "GetRatingList",
-			Handler:    _RatingService_GetRatingList_Handler,
-		},
-		{
-			MethodName: "HideRating",
-			Handler:    _RatingService_HideRating_Handler,
-		},
-		{
-			MethodName: "GetRatingStatistics",
-			Handler:    _RatingService_GetRatingStatistics_Handler,
-		},
-		{
-			MethodName: "RecalculateRating",
-			Handler:    _RatingService_RecalculateRating_Handler,
+			MethodName: "GetComplaints",
+			Handler:    _Rating_GetComplaints_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "rider/v1/rating.proto",
+	Metadata: "api/rider/v1/rating.proto",
 }

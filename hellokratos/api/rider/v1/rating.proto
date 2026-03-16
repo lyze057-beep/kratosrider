@@ -4,305 +4,162 @@ package api.rider.v1;
 
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
-import "validate/validate.proto";
 
 option go_package = "hellokratos/api/rider/v1;v1";
 option java_multiple_files = true;
-option java_package = "api.rider.v1";
+option java_package = "dev.kratos.api.rider.v1";
+option java_outer_classname = "RiderRatingProtoV1";
 
-// 骑手评分服务
-service RatingService {
-  // 提交评分
-  rpc SubmitRating (SubmitRatingRequest) returns (SubmitRatingReply) {
+// 评价服务
+service Rating {
+  // 提交订单评价
+  rpc SubmitOrderRating (SubmitOrderRatingRequest) returns (SubmitOrderRatingReply) {
     option (google.api.http) = {
-      post: "/rider/v1/rating/submit"
+      post: "/rider/v1/rating/order"
       body: "*"
     };
   }
 
-  // 获取骑手评分
-  rpc GetRiderRating (GetRiderRatingRequest) returns (GetRiderRatingReply) {
+  // 获取骑手评价列表
+  rpc GetRiderRatings (GetRiderRatingsRequest) returns (GetRiderRatingsReply) {
     option (google.api.http) = {
-      get: "/rider/v1/rating/{rider_id}"
+      get: "/rider/v1/ratings"
     };
   }
 
-  // 获取评分记录列表
-  rpc GetRatingRecords (GetRatingRecordsRequest) returns (GetRatingRecordsReply) {
+  // 获取骑手评分统计
+  rpc GetRiderRatingStats (GetRiderRatingStatsRequest) returns (GetRiderRatingStatsReply) {
     option (google.api.http) = {
-      get: "/rider/v1/rating/records"
+      get: "/rider/v1/rating/stats"
     };
   }
 
-  // 获取评分详情
-  rpc GetRatingDetail (GetRatingDetailRequest) returns (GetRatingDetailReply) {
+  // 提交投诉
+  rpc SubmitComplaint (SubmitComplaintRequest) returns (SubmitComplaintReply) {
     option (google.api.http) = {
-      get: "/rider/v1/rating/detail/{record_id}"
-    };
-  }
-
-  // 回复评价
-  rpc ReplyToRating (ReplyToRatingRequest) returns (ReplyToRatingReply) {
-    option (google.api.http) = {
-      post: "/rider/v1/rating/reply"
+      post: "/rider/v1/complaint"
       body: "*"
     };
   }
 
-  // 获取评分汇总
-  rpc GetRatingSummary (GetRatingSummaryRequest) returns (GetRatingSummaryReply) {
+  // 获取投诉列表
+  rpc GetComplaints (GetComplaintsRequest) returns (GetComplaintsReply) {
     option (google.api.http) = {
-      get: "/rider/v1/rating/summary/{rider_id}"
-    };
-  }
-
-  // ==================== 管理员接口 ====================
-
-  // 获取评分列表
-  rpc GetRatingList (GetRatingListRequest) returns (GetRatingListReply) {
-    option (google.api.http) = {
-      get: "/rider/v1/admin/rating/list"
-    };
-  }
-
-  // 隐藏评分
-  rpc HideRating (HideRatingRequest) returns (HideRatingReply) {
-    option (google.api.http) = {
-      post: "/rider/v1/admin/rating/hide"
-      body: "*"
-    };
-  }
-
-  // 获取评分统计
-  rpc GetRatingStatistics (GetRatingStatisticsRequest) returns (GetRatingStatisticsReply) {
-    option (google.api.http) = {
-      get: "/rider/v1/admin/rating/statistics"
-    };
-  }
-
-  // 重新计算评分
-  rpc RecalculateRating (RecalculateRatingRequest) returns (RecalculateRatingReply) {
-    option (google.api.http) = {
-      post: "/rider/v1/admin/rating/recalculate"
-      body: "*"
+      get: "/rider/v1/complaints"
     };
   }
 }
 
-// 评分来源
-enum RatingSource {
-  SOURCE_UNKNOWN = 0;
-  SOURCE_USER = 1;      // 用户评分
-  SOURCE_MERCHANT = 2;  // 商家评分
-  SOURCE_SYSTEM = 3;    // 系统评分
-  SOURCE_PLATFORM = 4;  // 平台评分
+// 提交订单评价请求
+message SubmitOrderRatingRequest {
+  int64 order_id = 1;           // 订单ID
+  int64 rider_id = 2;           // 骑手ID
+  int32 rating = 3;             // 评分(1-5)
+  repeated string tags = 4;     // 评价标签
+  string comment = 5;           // 评价内容
+  repeated string images = 6;   // 评价图片
 }
 
-// 评分维度
-enum RatingDimension {
-  DIMENSION_UNKNOWN = 0;
-  DIMENSION_OVERALL = 1;      // 综合评分
-  DIMENSION_DELIVERY = 2;     // 配送评分
-  DIMENSION_SERVICE = 3;      // 服务评分
-  DIMENSION_ATTITUDE = 4;     // 态度评分
-  DIMENSION_PUNCTUALITY = 5;  // 准时评分
+// 提交订单评价响应
+message SubmitOrderRatingReply {
+  bool success = 1;
+  string message = 2;
+  int64 rating_id = 3;
 }
 
-// 提交评分请求
-message SubmitRatingRequest {
-  int64 rider_id = 1 [(validate.rules).int64.gt = 0];
-  int64 order_id = 2 [(validate.rules).int64.gt = 0];
-  int64 rater_id = 3 [(validate.rules).int64.gt = 0];
-  int32 rater_type = 4 [(validate.rules).int32 = {in: [1, 2, 3]}];
-  RatingSource source = 5 [(validate.rules).enum.defined_only = true];
-  double score = 6 [(validate.rules).double = {gte: 0, lte: 5}];
-  RatingDimension dimension = 7 [(validate.rules).enum.defined_only = true];
-  repeated string tags = 8;
-  string comment = 9 [(validate.rules).string.max_len = 500];
-  bool is_anonymous = 10;
+// 获取骑手评价列表请求
+message GetRiderRatingsRequest {
+  int64 rider_id = 1;           // 骑手ID
+  int32 page = 2;               // 页码
+  int32 page_size = 3;          // 每页数量
+  int32 rating_filter = 4;      // 评分筛选(0=全部,1-5=对应评分)
 }
 
-// 提交评分响应
-message SubmitRatingReply {
-  int64 record_id = 1;
-  double updated_score = 2;
-  int32 rating_level = 3;
-  string effect = 4;
+// 获取骑手评价列表响应
+message GetRiderRatingsReply {
+  repeated RatingInfo ratings = 1;
+  int32 total = 2;
+  double average_rating = 3;    // 平均评分
 }
 
-// 获取骑手评分请求
-message GetRiderRatingRequest {
-  int64 rider_id = 1 [(validate.rules).int64.gt = 0];
-}
-
-// 获取骑手评分响应
-message GetRiderRatingReply {
-  RiderRating rating = 1;
-}
-
-// 骑手评分信息
-message RiderRating {
-  int64 rider_id = 1;
-  double overall_score = 2;
-  double delivery_score = 3;
-  double service_score = 4;
-  double attitude_score = 5;
-  double punctuality_score = 6;
-  int32 total_ratings = 7;
-  int32 user_ratings = 8;
-  int32 merchant_ratings = 9;
-  int32 system_ratings = 10;
-  int32 rating_level = 11;
-  int32 rating_trend = 12;
-  google.protobuf.Timestamp last_rating_at = 13;
-}
-
-// 获取评分记录列表请求
-message GetRatingRecordsRequest {
-  int64 rider_id = 1 [(validate.rules).int64.gt = 0];
-  RatingSource source = 2;
-  int32 page = 3 [(validate.rules).int32.gt = 0];
-  int32 page_size = 4 [(validate.rules).int32 = {gt: 0, lte: 100}];
-}
-
-// 获取评分记录列表响应
-message GetRatingRecordsReply {
-  repeated RatingRecord list = 1;
-  int64 total = 2;
-}
-
-// 评分记录
-message RatingRecord {
+// 评价信息
+message RatingInfo {
   int64 id = 1;
-  int64 rider_id = 2;
-  int64 order_id = 3;
-  int64 rater_id = 4;
-  int32 rater_type = 5;
-  RatingSource source = 6;
-  RatingDimension dimension = 7;
-  double score = 8;
-  repeated string tags = 9;
-  string comment = 10;
-  bool is_anonymous = 11;
-  bool is_visible = 12;
-  string reply = 13;
-  google.protobuf.Timestamp reply_time = 14;
-  google.protobuf.Timestamp created_at = 15;
+  int64 order_id = 2;
+  int64 rider_id = 3;
+  int32 rating = 4;
+  repeated string tags = 5;
+  string comment = 6;
+  repeated string images = 7;
+  google.protobuf.Timestamp created_at = 8;
+  bool is_anonymous = 9;
 }
 
-// 获取评分详情请求
-message GetRatingDetailRequest {
-  int64 record_id = 1 [(validate.rules).int64.gt = 0];
+// 获取骑手评分统计请求
+message GetRiderRatingStatsRequest {
+  int64 rider_id = 1;           // 骑手ID
+  string date_range = 2;        // 时间范围(7d/30d/90d)
 }
 
-// 获取评分详情响应
-message GetRatingDetailReply {
-  RatingRecord record = 1;
+// 获取骑手评分统计响应
+message GetRiderRatingStatsReply {
+  double average_rating = 1;    // 平均评分
+  int32 total_ratings = 2;      // 总评价数
+  int32 five_star_count = 3;    // 5星数量
+  int32 four_star_count = 4;    // 4星数量
+  int32 three_star_count = 5;   // 3星数量
+  int32 two_star_count = 6;     // 2星数量
+  int32 one_star_count = 7;     // 1星数量
+  double praise_rate = 8;       // 好评率
+  repeated RatingTagStats tag_stats = 9; // 标签统计
 }
 
-// 回复评价请求
-message ReplyToRatingRequest {
-  int64 record_id = 1 [(validate.rules).int64.gt = 0];
-  string reply = 2 [(validate.rules).string = {min_len: 1, max_len: 500}];
+// 评价标签统计
+message RatingTagStats {
+  string tag = 1;
+  int32 count = 2;
 }
 
-// 回复评价响应
-message ReplyToRatingReply {
+// 提交投诉请求
+message SubmitComplaintRequest {
+  int64 rider_id = 1;           // 骑手ID
+  int64 order_id = 2;           // 订单ID(可选)
+  string complaint_type = 3;    // 投诉类型
+  string content = 4;           // 投诉内容
+  repeated string images = 5;   // 投诉图片
+  string contact_phone = 6;     // 联系电话
+}
+
+// 提交投诉响应
+message SubmitComplaintReply {
   bool success = 1;
-  google.protobuf.Timestamp reply_time = 2;
+  string message = 2;
+  int64 complaint_id = 3;
+  string ticket_no = 4;         // 工单号
 }
 
-// 获取评分汇总请求
-message GetRatingSummaryRequest {
-  int64 rider_id = 1 [(validate.rules).int64.gt = 0];
+// 获取投诉列表请求
+message GetComplaintsRequest {
+  int64 rider_id = 1;           // 骑手ID
+  int32 page = 2;               // 页码
+  int32 page_size = 3;          // 每页数量
+  string status = 4;            // 状态筛选
 }
 
-// 获取评分汇总响应
-message GetRatingSummaryReply {
-  RatingSummary summary = 1;
+// 获取投诉列表响应
+message GetComplaintsReply {
+  repeated ComplaintInfo complaints = 1;
+  int32 total = 2;
 }
 
-// 评分汇总
-message RatingSummary {
-  double overall_score = 1;
-  double delivery_score = 2;
-  double service_score = 3;
-  double attitude_score = 4;
-  double punctuality_score = 5;
-  int32 total_ratings = 6;
-  int32 rating_level = 7;
-  int32 rating_trend = 8;
-  StarDistribution star_distribution = 9;
-}
-
-// 星级分布
-message StarDistribution {
-  int32 five_star = 1;
-  int32 four_star = 2;
-  int32 three_star = 3;
-  int32 two_star = 4;
-  int32 one_star = 5;
-  double five_star_percent = 6;
-  double four_star_percent = 7;
-  double three_star_percent = 8;
-  double two_star_percent = 9;
-  double one_star_percent = 10;
-}
-
-// ==================== 管理员接口消息 ====================
-
-// 获取评分列表请求
-message GetRatingListRequest {
-  int64 rider_id = 1;
-  RatingSource source = 2;
-  double min_score = 3;
-  double max_score = 4;
-  string start_time = 5;
-  string end_time = 6;
-  int32 page = 7 [(validate.rules).int32.gt = 0];
-  int32 page_size = 8 [(validate.rules).int32 = {gt: 0, lte: 100}];
-}
-
-// 获取评分列表响应
-message GetRatingListReply {
-  repeated RatingRecord list = 1;
-  int64 total = 2;
-}
-
-// 隐藏评分请求
-message HideRatingRequest {
-  int64 record_id = 1 [(validate.rules).int64.gt = 0];
-}
-
-// 隐藏评分响应
-message HideRatingReply {
-  bool success = 1;
-}
-
-// 获取评分统计请求
-message GetRatingStatisticsRequest {
-  string start_date = 1 [(validate.rules).string.len = 8];
-  string end_date = 2 [(validate.rules).string.len = 8];
-}
-
-// 获取评分统计响应
-message GetRatingStatisticsReply {
-  int64 total_ratings = 1;
-  double avg_score = 2;
-  double five_star_rate = 3;
-  double positive_rate = 4;
-  double negative_rate = 5;
-  double complaint_rate = 6;
-}
-
-// 重新计算评分请求
-message RecalculateRatingRequest {
-  int64 rider_id = 1 [(validate.rules).int64.gt = 0];
-}
-
-// 重新计算评分响应
-message RecalculateRatingReply {
-  bool success = 1;
-  double new_score = 2;
-  int32 new_level = 3;
+// 投诉信息
+message ComplaintInfo {
+  int64 id = 1;
+  string ticket_no = 2;         // 工单号
+  string complaint_type = 3;    // 投诉类型
+  string content = 4;           // 投诉内容
+  string status = 5;            // 处理状态
+  string reply = 6;             // 处理回复
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
 }

@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-http v2.9.2
 // - protoc             v3.19.4
-// source: rider/v1/rating.proto
+// source: api/rider/v1/rating.proto
 
 package v1
 
@@ -19,302 +19,162 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationRatingServiceGetRatingDetail = "/api.rider.v1.RatingService/GetRatingDetail"
-const OperationRatingServiceGetRatingList = "/api.rider.v1.RatingService/GetRatingList"
-const OperationRatingServiceGetRatingRecords = "/api.rider.v1.RatingService/GetRatingRecords"
-const OperationRatingServiceGetRatingStatistics = "/api.rider.v1.RatingService/GetRatingStatistics"
-const OperationRatingServiceGetRatingSummary = "/api.rider.v1.RatingService/GetRatingSummary"
-const OperationRatingServiceGetRiderRating = "/api.rider.v1.RatingService/GetRiderRating"
-const OperationRatingServiceHideRating = "/api.rider.v1.RatingService/HideRating"
-const OperationRatingServiceRecalculateRating = "/api.rider.v1.RatingService/RecalculateRating"
-const OperationRatingServiceReplyToRating = "/api.rider.v1.RatingService/ReplyToRating"
-const OperationRatingServiceSubmitRating = "/api.rider.v1.RatingService/SubmitRating"
+const OperationRatingGetComplaints = "/api.rider.v1.Rating/GetComplaints"
+const OperationRatingGetRiderRatingStats = "/api.rider.v1.Rating/GetRiderRatingStats"
+const OperationRatingGetRiderRatings = "/api.rider.v1.Rating/GetRiderRatings"
+const OperationRatingSubmitComplaint = "/api.rider.v1.Rating/SubmitComplaint"
+const OperationRatingSubmitOrderRating = "/api.rider.v1.Rating/SubmitOrderRating"
 
-type RatingServiceHTTPServer interface {
-	// GetRatingDetail 获取评分详情
-	GetRatingDetail(context.Context, *GetRatingDetailRequest) (*GetRatingDetailReply, error)
-	// GetRatingList 获取评分列表
-	GetRatingList(context.Context, *GetRatingListRequest) (*GetRatingListReply, error)
-	// GetRatingRecords 获取评分记录列表
-	GetRatingRecords(context.Context, *GetRatingRecordsRequest) (*GetRatingRecordsReply, error)
-	// GetRatingStatistics 获取评分统计
-	GetRatingStatistics(context.Context, *GetRatingStatisticsRequest) (*GetRatingStatisticsReply, error)
-	// GetRatingSummary 获取评分汇总
-	GetRatingSummary(context.Context, *GetRatingSummaryRequest) (*GetRatingSummaryReply, error)
-	// GetRiderRating 获取骑手评分
-	GetRiderRating(context.Context, *GetRiderRatingRequest) (*GetRiderRatingReply, error)
-	// HideRating 隐藏评分
-	HideRating(context.Context, *HideRatingRequest) (*HideRatingReply, error)
-	// RecalculateRating 重新计算评分
-	RecalculateRating(context.Context, *RecalculateRatingRequest) (*RecalculateRatingReply, error)
-	// ReplyToRating 回复评价
-	ReplyToRating(context.Context, *ReplyToRatingRequest) (*ReplyToRatingReply, error)
-	// SubmitRating 提交评分
-	SubmitRating(context.Context, *SubmitRatingRequest) (*SubmitRatingReply, error)
+type RatingHTTPServer interface {
+	// GetComplaints 获取投诉列表
+	GetComplaints(context.Context, *GetComplaintsRequest) (*GetComplaintsReply, error)
+	// GetRiderRatingStats 获取骑手评分统计
+	GetRiderRatingStats(context.Context, *GetRiderRatingStatsRequest) (*GetRiderRatingStatsReply, error)
+	// GetRiderRatings 获取骑手评价列表
+	GetRiderRatings(context.Context, *GetRiderRatingsRequest) (*GetRiderRatingsReply, error)
+	// SubmitComplaint 提交投诉
+	SubmitComplaint(context.Context, *SubmitComplaintRequest) (*SubmitComplaintReply, error)
+	// SubmitOrderRating 提交订单评价
+	SubmitOrderRating(context.Context, *SubmitOrderRatingRequest) (*SubmitOrderRatingReply, error)
 }
 
-func RegisterRatingServiceHTTPServer(s *http.Server, srv RatingServiceHTTPServer) {
+func RegisterRatingHTTPServer(s *http.Server, srv RatingHTTPServer) {
 	r := s.Route("/")
-	r.POST("/rider/v1/rating/submit", _RatingService_SubmitRating0_HTTP_Handler(srv))
-	r.GET("/rider/v1/rating/{rider_id}", _RatingService_GetRiderRating0_HTTP_Handler(srv))
-	r.GET("/rider/v1/rating/records", _RatingService_GetRatingRecords0_HTTP_Handler(srv))
-	r.GET("/rider/v1/rating/detail/{record_id}", _RatingService_GetRatingDetail0_HTTP_Handler(srv))
-	r.POST("/rider/v1/rating/reply", _RatingService_ReplyToRating0_HTTP_Handler(srv))
-	r.GET("/rider/v1/rating/summary/{rider_id}", _RatingService_GetRatingSummary0_HTTP_Handler(srv))
-	r.GET("/rider/v1/admin/rating/list", _RatingService_GetRatingList0_HTTP_Handler(srv))
-	r.POST("/rider/v1/admin/rating/hide", _RatingService_HideRating0_HTTP_Handler(srv))
-	r.GET("/rider/v1/admin/rating/statistics", _RatingService_GetRatingStatistics0_HTTP_Handler(srv))
-	r.POST("/rider/v1/admin/rating/recalculate", _RatingService_RecalculateRating0_HTTP_Handler(srv))
+	r.POST("/rider/v1/rating/order", _Rating_SubmitOrderRating0_HTTP_Handler(srv))
+	r.GET("/rider/v1/ratings", _Rating_GetRiderRatings0_HTTP_Handler(srv))
+	r.GET("/rider/v1/rating/stats", _Rating_GetRiderRatingStats0_HTTP_Handler(srv))
+	r.POST("/rider/v1/complaint", _Rating_SubmitComplaint0_HTTP_Handler(srv))
+	r.GET("/rider/v1/complaints", _Rating_GetComplaints0_HTTP_Handler(srv))
 }
 
-func _RatingService_SubmitRating0_HTTP_Handler(srv RatingServiceHTTPServer) func(ctx http.Context) error {
+func _Rating_SubmitOrderRating0_HTTP_Handler(srv RatingHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in SubmitRatingRequest
+		var in SubmitOrderRatingRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationRatingServiceSubmitRating)
+		http.SetOperation(ctx, OperationRatingSubmitOrderRating)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.SubmitRating(ctx, req.(*SubmitRatingRequest))
+			return srv.SubmitOrderRating(ctx, req.(*SubmitOrderRatingRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*SubmitRatingReply)
+		reply := out.(*SubmitOrderRatingReply)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _RatingService_GetRiderRating0_HTTP_Handler(srv RatingServiceHTTPServer) func(ctx http.Context) error {
+func _Rating_GetRiderRatings0_HTTP_Handler(srv RatingHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetRiderRatingRequest
+		var in GetRiderRatingsRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationRatingServiceGetRiderRating)
+		http.SetOperation(ctx, OperationRatingGetRiderRatings)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetRiderRating(ctx, req.(*GetRiderRatingRequest))
+			return srv.GetRiderRatings(ctx, req.(*GetRiderRatingsRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*GetRiderRatingReply)
+		reply := out.(*GetRiderRatingsReply)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _RatingService_GetRatingRecords0_HTTP_Handler(srv RatingServiceHTTPServer) func(ctx http.Context) error {
+func _Rating_GetRiderRatingStats0_HTTP_Handler(srv RatingHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetRatingRecordsRequest
+		var in GetRiderRatingStatsRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationRatingServiceGetRatingRecords)
+		http.SetOperation(ctx, OperationRatingGetRiderRatingStats)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetRatingRecords(ctx, req.(*GetRatingRecordsRequest))
+			return srv.GetRiderRatingStats(ctx, req.(*GetRiderRatingStatsRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*GetRatingRecordsReply)
+		reply := out.(*GetRiderRatingStatsReply)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _RatingService_GetRatingDetail0_HTTP_Handler(srv RatingServiceHTTPServer) func(ctx http.Context) error {
+func _Rating_SubmitComplaint0_HTTP_Handler(srv RatingHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetRatingDetailRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationRatingServiceGetRatingDetail)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetRatingDetail(ctx, req.(*GetRatingDetailRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*GetRatingDetailReply)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _RatingService_ReplyToRating0_HTTP_Handler(srv RatingServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in ReplyToRatingRequest
+		var in SubmitComplaintRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationRatingServiceReplyToRating)
+		http.SetOperation(ctx, OperationRatingSubmitComplaint)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.ReplyToRating(ctx, req.(*ReplyToRatingRequest))
+			return srv.SubmitComplaint(ctx, req.(*SubmitComplaintRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*ReplyToRatingReply)
+		reply := out.(*SubmitComplaintReply)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _RatingService_GetRatingSummary0_HTTP_Handler(srv RatingServiceHTTPServer) func(ctx http.Context) error {
+func _Rating_GetComplaints0_HTTP_Handler(srv RatingHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in GetRatingSummaryRequest
+		var in GetComplaintsRequest
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationRatingServiceGetRatingSummary)
+		http.SetOperation(ctx, OperationRatingGetComplaints)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetRatingSummary(ctx, req.(*GetRatingSummaryRequest))
+			return srv.GetComplaints(ctx, req.(*GetComplaintsRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*GetRatingSummaryReply)
+		reply := out.(*GetComplaintsReply)
 		return ctx.Result(200, reply)
 	}
 }
 
-func _RatingService_GetRatingList0_HTTP_Handler(srv RatingServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetRatingListRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationRatingServiceGetRatingList)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetRatingList(ctx, req.(*GetRatingListRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*GetRatingListReply)
-		return ctx.Result(200, reply)
-	}
+type RatingHTTPClient interface {
+	// GetComplaints 获取投诉列表
+	GetComplaints(ctx context.Context, req *GetComplaintsRequest, opts ...http.CallOption) (rsp *GetComplaintsReply, err error)
+	// GetRiderRatingStats 获取骑手评分统计
+	GetRiderRatingStats(ctx context.Context, req *GetRiderRatingStatsRequest, opts ...http.CallOption) (rsp *GetRiderRatingStatsReply, err error)
+	// GetRiderRatings 获取骑手评价列表
+	GetRiderRatings(ctx context.Context, req *GetRiderRatingsRequest, opts ...http.CallOption) (rsp *GetRiderRatingsReply, err error)
+	// SubmitComplaint 提交投诉
+	SubmitComplaint(ctx context.Context, req *SubmitComplaintRequest, opts ...http.CallOption) (rsp *SubmitComplaintReply, err error)
+	// SubmitOrderRating 提交订单评价
+	SubmitOrderRating(ctx context.Context, req *SubmitOrderRatingRequest, opts ...http.CallOption) (rsp *SubmitOrderRatingReply, err error)
 }
 
-func _RatingService_HideRating0_HTTP_Handler(srv RatingServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in HideRatingRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationRatingServiceHideRating)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.HideRating(ctx, req.(*HideRatingRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*HideRatingReply)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _RatingService_GetRatingStatistics0_HTTP_Handler(srv RatingServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in GetRatingStatisticsRequest
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationRatingServiceGetRatingStatistics)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.GetRatingStatistics(ctx, req.(*GetRatingStatisticsRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*GetRatingStatisticsReply)
-		return ctx.Result(200, reply)
-	}
-}
-
-func _RatingService_RecalculateRating0_HTTP_Handler(srv RatingServiceHTTPServer) func(ctx http.Context) error {
-	return func(ctx http.Context) error {
-		var in RecalculateRatingRequest
-		if err := ctx.Bind(&in); err != nil {
-			return err
-		}
-		if err := ctx.BindQuery(&in); err != nil {
-			return err
-		}
-		http.SetOperation(ctx, OperationRatingServiceRecalculateRating)
-		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.RecalculateRating(ctx, req.(*RecalculateRatingRequest))
-		})
-		out, err := h(ctx, &in)
-		if err != nil {
-			return err
-		}
-		reply := out.(*RecalculateRatingReply)
-		return ctx.Result(200, reply)
-	}
-}
-
-type RatingServiceHTTPClient interface {
-	// GetRatingDetail 获取评分详情
-	GetRatingDetail(ctx context.Context, req *GetRatingDetailRequest, opts ...http.CallOption) (rsp *GetRatingDetailReply, err error)
-	// GetRatingList 获取评分列表
-	GetRatingList(ctx context.Context, req *GetRatingListRequest, opts ...http.CallOption) (rsp *GetRatingListReply, err error)
-	// GetRatingRecords 获取评分记录列表
-	GetRatingRecords(ctx context.Context, req *GetRatingRecordsRequest, opts ...http.CallOption) (rsp *GetRatingRecordsReply, err error)
-	// GetRatingStatistics 获取评分统计
-	GetRatingStatistics(ctx context.Context, req *GetRatingStatisticsRequest, opts ...http.CallOption) (rsp *GetRatingStatisticsReply, err error)
-	// GetRatingSummary 获取评分汇总
-	GetRatingSummary(ctx context.Context, req *GetRatingSummaryRequest, opts ...http.CallOption) (rsp *GetRatingSummaryReply, err error)
-	// GetRiderRating 获取骑手评分
-	GetRiderRating(ctx context.Context, req *GetRiderRatingRequest, opts ...http.CallOption) (rsp *GetRiderRatingReply, err error)
-	// HideRating 隐藏评分
-	HideRating(ctx context.Context, req *HideRatingRequest, opts ...http.CallOption) (rsp *HideRatingReply, err error)
-	// RecalculateRating 重新计算评分
-	RecalculateRating(ctx context.Context, req *RecalculateRatingRequest, opts ...http.CallOption) (rsp *RecalculateRatingReply, err error)
-	// ReplyToRating 回复评价
-	ReplyToRating(ctx context.Context, req *ReplyToRatingRequest, opts ...http.CallOption) (rsp *ReplyToRatingReply, err error)
-	// SubmitRating 提交评分
-	SubmitRating(ctx context.Context, req *SubmitRatingRequest, opts ...http.CallOption) (rsp *SubmitRatingReply, err error)
-}
-
-type RatingServiceHTTPClientImpl struct {
+type RatingHTTPClientImpl struct {
 	cc *http.Client
 }
 
-func NewRatingServiceHTTPClient(client *http.Client) RatingServiceHTTPClient {
-	return &RatingServiceHTTPClientImpl{client}
+func NewRatingHTTPClient(client *http.Client) RatingHTTPClient {
+	return &RatingHTTPClientImpl{client}
 }
 
-// GetRatingDetail 获取评分详情
-func (c *RatingServiceHTTPClientImpl) GetRatingDetail(ctx context.Context, in *GetRatingDetailRequest, opts ...http.CallOption) (*GetRatingDetailReply, error) {
-	var out GetRatingDetailReply
-	pattern := "/rider/v1/rating/detail/{record_id}"
+// GetComplaints 获取投诉列表
+func (c *RatingHTTPClientImpl) GetComplaints(ctx context.Context, in *GetComplaintsRequest, opts ...http.CallOption) (*GetComplaintsReply, error) {
+	var out GetComplaintsReply
+	pattern := "/rider/v1/complaints"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationRatingServiceGetRatingDetail))
+	opts = append(opts, http.Operation(OperationRatingGetComplaints))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -323,12 +183,12 @@ func (c *RatingServiceHTTPClientImpl) GetRatingDetail(ctx context.Context, in *G
 	return &out, nil
 }
 
-// GetRatingList 获取评分列表
-func (c *RatingServiceHTTPClientImpl) GetRatingList(ctx context.Context, in *GetRatingListRequest, opts ...http.CallOption) (*GetRatingListReply, error) {
-	var out GetRatingListReply
-	pattern := "/rider/v1/admin/rating/list"
+// GetRiderRatingStats 获取骑手评分统计
+func (c *RatingHTTPClientImpl) GetRiderRatingStats(ctx context.Context, in *GetRiderRatingStatsRequest, opts ...http.CallOption) (*GetRiderRatingStatsReply, error) {
+	var out GetRiderRatingStatsReply
+	pattern := "/rider/v1/rating/stats"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationRatingServiceGetRatingList))
+	opts = append(opts, http.Operation(OperationRatingGetRiderRatingStats))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -337,12 +197,12 @@ func (c *RatingServiceHTTPClientImpl) GetRatingList(ctx context.Context, in *Get
 	return &out, nil
 }
 
-// GetRatingRecords 获取评分记录列表
-func (c *RatingServiceHTTPClientImpl) GetRatingRecords(ctx context.Context, in *GetRatingRecordsRequest, opts ...http.CallOption) (*GetRatingRecordsReply, error) {
-	var out GetRatingRecordsReply
-	pattern := "/rider/v1/rating/records"
+// GetRiderRatings 获取骑手评价列表
+func (c *RatingHTTPClientImpl) GetRiderRatings(ctx context.Context, in *GetRiderRatingsRequest, opts ...http.CallOption) (*GetRiderRatingsReply, error) {
+	var out GetRiderRatingsReply
+	pattern := "/rider/v1/ratings"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationRatingServiceGetRatingRecords))
+	opts = append(opts, http.Operation(OperationRatingGetRiderRatings))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
@@ -351,54 +211,12 @@ func (c *RatingServiceHTTPClientImpl) GetRatingRecords(ctx context.Context, in *
 	return &out, nil
 }
 
-// GetRatingStatistics 获取评分统计
-func (c *RatingServiceHTTPClientImpl) GetRatingStatistics(ctx context.Context, in *GetRatingStatisticsRequest, opts ...http.CallOption) (*GetRatingStatisticsReply, error) {
-	var out GetRatingStatisticsReply
-	pattern := "/rider/v1/admin/rating/statistics"
-	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationRatingServiceGetRatingStatistics))
-	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// GetRatingSummary 获取评分汇总
-func (c *RatingServiceHTTPClientImpl) GetRatingSummary(ctx context.Context, in *GetRatingSummaryRequest, opts ...http.CallOption) (*GetRatingSummaryReply, error) {
-	var out GetRatingSummaryReply
-	pattern := "/rider/v1/rating/summary/{rider_id}"
-	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationRatingServiceGetRatingSummary))
-	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// GetRiderRating 获取骑手评分
-func (c *RatingServiceHTTPClientImpl) GetRiderRating(ctx context.Context, in *GetRiderRatingRequest, opts ...http.CallOption) (*GetRiderRatingReply, error) {
-	var out GetRiderRatingReply
-	pattern := "/rider/v1/rating/{rider_id}"
-	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationRatingServiceGetRiderRating))
-	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// HideRating 隐藏评分
-func (c *RatingServiceHTTPClientImpl) HideRating(ctx context.Context, in *HideRatingRequest, opts ...http.CallOption) (*HideRatingReply, error) {
-	var out HideRatingReply
-	pattern := "/rider/v1/admin/rating/hide"
+// SubmitComplaint 提交投诉
+func (c *RatingHTTPClientImpl) SubmitComplaint(ctx context.Context, in *SubmitComplaintRequest, opts ...http.CallOption) (*SubmitComplaintReply, error) {
+	var out SubmitComplaintReply
+	pattern := "/rider/v1/complaint"
 	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationRatingServiceHideRating))
+	opts = append(opts, http.Operation(OperationRatingSubmitComplaint))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
@@ -407,40 +225,12 @@ func (c *RatingServiceHTTPClientImpl) HideRating(ctx context.Context, in *HideRa
 	return &out, nil
 }
 
-// RecalculateRating 重新计算评分
-func (c *RatingServiceHTTPClientImpl) RecalculateRating(ctx context.Context, in *RecalculateRatingRequest, opts ...http.CallOption) (*RecalculateRatingReply, error) {
-	var out RecalculateRatingReply
-	pattern := "/rider/v1/admin/rating/recalculate"
+// SubmitOrderRating 提交订单评价
+func (c *RatingHTTPClientImpl) SubmitOrderRating(ctx context.Context, in *SubmitOrderRatingRequest, opts ...http.CallOption) (*SubmitOrderRatingReply, error) {
+	var out SubmitOrderRatingReply
+	pattern := "/rider/v1/rating/order"
 	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationRatingServiceRecalculateRating))
-	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// ReplyToRating 回复评价
-func (c *RatingServiceHTTPClientImpl) ReplyToRating(ctx context.Context, in *ReplyToRatingRequest, opts ...http.CallOption) (*ReplyToRatingReply, error) {
-	var out ReplyToRatingReply
-	pattern := "/rider/v1/rating/reply"
-	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationRatingServiceReplyToRating))
-	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
-// SubmitRating 提交评分
-func (c *RatingServiceHTTPClientImpl) SubmitRating(ctx context.Context, in *SubmitRatingRequest, opts ...http.CallOption) (*SubmitRatingReply, error) {
-	var out SubmitRatingReply
-	pattern := "/rider/v1/rating/submit"
-	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationRatingServiceSubmitRating))
+	opts = append(opts, http.Operation(OperationRatingSubmitOrderRating))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
