@@ -18,9 +18,9 @@ export interface OrderInfo {
 }
 
 export const orderApi = {
-  getOrderList: async (status: number, page: number, pageSize: number) => {
+  getOrderList: async (status: number, page: number, pageSize: number, riderId?: number) => {
     const response = await apiClient.get('/rider/v1/orders', {
-      params: { status, page, page_size: pageSize }
+      params: { status, page, page_size: pageSize, rider_id: riderId }
     });
     return response.data;
   },

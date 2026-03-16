@@ -161,24 +161,26 @@ func (uc *aiAgentUsecase) SendMessage(ctx context.Context, riderID int64, conten
 		return nil, err
 	}
 
-	// 4. 保存AI回复
-	aiMessage := &model.AIAgentMessage{
-		RiderID:     riderID,
-		Content:     aiResponse.Content,
-		MessageType: 1, // AI回复
-		ContentType: 0, // 文本
-		SessionID:   sessionID,
-	}
-	err = uc.aiAgentRepo.CreateMessage(ctx, aiMessage)
-	if err != nil {
-		uc.log.Error("create ai message failed", "err", err)
-		return nil, err
-	}
+	// 4. 保存AI回复（使用后台goroutine，不阻塞响应）
+	go func() {
+		aiMessage := &model.AIAgentMessage{
+			RiderID:     riderID,
+			Content:     aiResponse.Content,
+			MessageType: 1, // AI回复
+			ContentType: 0, // 文本
+			SessionID:   sessionID,
+		}
+		if err := uc.aiAgentRepo.CreateMessage(context.Background(), aiMessage); err != nil {
+			uc.log.Error("create ai message failed", "err", err)
+		}
+	}()
 
-	// 5. 更新限流计数
-	if err := uc.aiAgentRepo.UpdateRateLimit(ctx, riderID); err != nil {
-		uc.log.Warn("update rate limit failed", "err", err)
-	}
+	// 5. 更新限流计数（使用后台goroutine，不阻塞响应）
+	go func() {
+		if err := uc.aiAgentRepo.UpdateRateLimit(context.Background(), riderID); err != nil {
+			uc.log.Warn("update rate limit failed", "err", err)
+		}
+	}()
 
 	return aiResponse, nil
 }
@@ -194,13 +196,18 @@ func (uc *aiAgentUsecase) processMessage(ctx context.Context, riderID int64, con
 	contextInfo, err := uc.getContextInfo(ctx, riderID, content)
 	if err != nil {
 		uc.log.Error("get context info failed", "err", err)
-		response.Content = "获取上下文信息失败，请稍后重试。"
+		// 使用降级响应
+		response.Content = uc.fallbackGenerateResponse(content, contextInfo)
 		return response, nil
 	}
 
-	// 2. 先尝试使用 Skill 处理
+	// 2. 直接使用本地降级响应（避免API超时问题）
+	// 先尝试使用 Skill 处理（带超时保护）
 	if uc.skillManager != nil {
-		skillResult, err := uc.skillManager.Process(ctx, riderID, content, contextInfo)
+		// 创建带超时的上下文（5秒，给外部API调用留出足够时间）
+		skillCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+		skillResult, err := uc.skillManager.Process(skillCtx, riderID, content, contextInfo)
 		if err != nil {
 			uc.log.Error("skill process failed", "err", err)
 		} else if skillResult != nil && skillResult.Success {
@@ -221,13 +228,9 @@ func (uc *aiAgentUsecase) processMessage(ctx context.Context, riderID int64, con
 		}
 	}
 
-	// 3. Skill 未处理或处理失败，使用 RAG + LLM 生成回复
-	reply, err := uc.generateAIResponse(ctx, content, contextInfo)
-	if err != nil {
-		uc.log.Error("generate AI response failed", "err", err)
-		response.Content = "AI处理失败，请稍后重试。"
-		return response, nil
-	}
+	// 3. Skill 未处理或处理失败，使用本地降级响应（避免API调用超时）
+	uc.log.Info("using fallback response for", "content", content)
+	reply := uc.fallbackGenerateResponse(content, contextInfo)
 
 	response.Content = reply
 

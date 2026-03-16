@@ -8,6 +8,13 @@ import MainLayout from './pages/MainLayout';
 import OrderPage from './pages/OrderPage';
 import IncomePage from './pages/IncomePage';
 import AIAgentPage from './pages/AIAgentPage';
+import MessagePage from './pages/MessagePage';
+import QualificationPage from './pages/QualificationPage';
+import ProfilePage from './pages/ProfilePage';
+import TicketPage from './pages/TicketPage';
+import ReferralPage from './pages/ReferralPage';
+import RatingPage from './pages/RatingPage';
+import DeactivationPage from './pages/DeactivationPage';
 import { useAuthStore } from './store/authStore';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -50,6 +57,34 @@ const App: React.FC = () => {
         {
           path: 'ai',
           element: <AIAgentPage />,
+        },
+        {
+          path: 'messages',
+          element: <MessagePage />,
+        },
+        {
+          path: 'qualification',
+          element: <QualificationPage />,
+        },
+        {
+          path: 'profile',
+          element: <ProfilePage />,
+        },
+        {
+          path: 'tickets',
+          element: <TicketPage />,
+        },
+        {
+          path: 'referral',
+          element: <ReferralPage />,
+        },
+        {
+          path: 'rating',
+          element: <RatingPage />,
+        },
+        {
+          path: 'deactivation',
+          element: <DeactivationPage />,
         },
       ],
     },

@@ -49,8 +49,17 @@ func (s *OrderService) GetOrderList(ctx context.Context, req *v1.GetOrderListReq
 		// 查询待接单订单（rider_id=0 表示未分配骑手）
 		orders, total, err = s.orderUsecase.GetOrdersByRiderID(ctx, 0, 0, page, pageSize)
 	} else {
-		// 从上下文获取骑手ID（实际应用中需要从token中解析）
-		riderID := int64(1) // 这里暂时硬编码，实际应从认证信息中获取
+		// 从请求参数获取骑手ID
+		riderID := req.RiderId
+		if riderID <= 0 {
+			// 如果没有提供 rider_id，返回空列表
+			return &v1.GetOrderListReply{
+				Orders:   []*v1.OrderInfo{},
+				Total:    0,
+				Page:     req.Page,
+				PageSize: req.PageSize,
+			}, nil
+		}
 		orders, total, err = s.orderUsecase.GetOrdersByRiderID(ctx, riderID, req.Status, page, pageSize)
 	}
 

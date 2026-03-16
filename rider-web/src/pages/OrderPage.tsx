@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Tag, message, Space, Card, Tabs } from 'antd';
+import { Table, Button, Tag, message, Card, Tabs } from 'antd';
 import { CheckOutlined, CarOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { orderApi, OrderInfo, ORDER_STATUS, ORDER_STATUS_TEXT } from '../api/order';
 import { useAuthStore } from '../store/authStore';
@@ -13,7 +13,8 @@ const OrderPage: React.FC = () => {
   const loadOrders = async (status: number) => {
     setLoading(true);
     try {
-      const result = await orderApi.getOrderList(status, 1, 20);
+      const riderId = userInfo?.userId ? Number(userInfo.userId) : undefined;
+      const result = await orderApi.getOrderList(status, 1, 20, riderId);
       setOrders(result.orders || []);
     } catch (error) {
       message.error('加载订单失败');
@@ -28,7 +29,7 @@ const OrderPage: React.FC = () => {
 
   const handleAccept = async (orderId: number) => {
     try {
-      const result = await orderApi.acceptOrder(orderId, Number(userInfo?.user_id || 0));
+      const result = await orderApi.acceptOrder(orderId, Number(userInfo?.userId || 0));
       if (result.success) {
         message.success('接单成功');
         loadOrders(parseInt(activeTab));

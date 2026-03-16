@@ -43,7 +43,7 @@ const LoginPage: React.FC = () => {
     setLoading(true);
     try {
       const result = await authApi.loginByPassword(values.phone, values.password);
-      setAuth(result.token, result.refresh_token, result.user_info);
+      setAuth(result.token, result.refreshToken, result.userInfo);
       message.success('登录成功');
       navigate('/');
     } catch (error: any) {
@@ -57,7 +57,7 @@ const LoginPage: React.FC = () => {
     setLoading(true);
     try {
       const result = await authApi.loginByPhone(values.phone, values.code);
-      setAuth(result.token, result.refresh_token, result.user_info);
+      setAuth(result.token, result.refreshToken, result.userInfo);
       message.success('登录成功');
       navigate('/');
     } catch (error: any) {
@@ -100,8 +100,11 @@ const LoginPage: React.FC = () => {
               prefix={<UserOutlined />}
               placeholder="请输入验证码"
               maxLength={6}
-              enterButton={countdown > 0 ? `${countdown}s` : '获取验证码'}
-              disabled={countdown > 0}
+              enterButton={
+                <Button type="primary" disabled={countdown > 0}>
+                  {countdown > 0 ? `${countdown}s` : '获取验证码'}
+                </Button>
+              }
               onSearch={handleSendCode}
             />
           </Form.Item>

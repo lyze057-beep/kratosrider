@@ -9,8 +9,26 @@ export interface AIAgentChatMessage {
   created_at: string;
 }
 
+export interface AIResponse {
+  content: string;
+  response_type: number;
+  created_at: string;
+  // 驼峰命名兼容
+  Content?: string;
+  ResponseType?: number;
+  CreatedAt?: string;
+}
+
+export interface SendMessageResponse {
+  success: boolean;
+  message: string;
+  ai_response?: AIResponse;
+  // 驼峰命名兼容
+  aiResponse?: AIResponse;
+}
+
 export const aiAgentApi = {
-  sendMessage: async (riderId: number, content: string) => {
+  sendMessage: async (riderId: number, content: string): Promise<SendMessageResponse> => {
     const response = await apiClient.post('/rider/v1/ai-agent/send', {
       rider_id: riderId,
       content,

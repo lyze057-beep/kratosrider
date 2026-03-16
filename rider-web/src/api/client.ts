@@ -1,39 +1,40 @@
 import axios from 'axios';
+import type { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE_URL = 'https://lyzzs.fun';
 
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+    baseURL: API_BASE_URL,
+    timeout: 30000,
+    headers: {
+        'Content-Type': 'application/json',
+    },
 });
 
 apiClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    (config: InternalAxiosRequestConfig<any>) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error: any) => {
+        return Promise.reject(error);
     }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
 );
 
 apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('userInfo');
-      window.location.href = '/login';
+    (response: AxiosResponse<any, any>) => response,
+    (error: any) => {
+        if (error.response?.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('userInfo');
+            window.location.href = '/login';
+        }
+        return Promise.reject(error);
     }
-    return Promise.reject(error);
-  }
 );
 
 export default apiClient;

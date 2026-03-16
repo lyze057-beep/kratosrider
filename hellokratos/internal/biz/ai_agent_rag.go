@@ -198,9 +198,20 @@ func NewVectorDBService(embeddingService EmbeddingService) VectorDBService {
 func (v *milvusVectorDBService) Init(ctx context.Context, cfg *conf.Data) error {
 	v.cfg = cfg
 
+	// 从配置读取Milvus地址，如果没有则跳过初始化
+	milvusAddr := ""
+	if cfg.GetAiService() != nil {
+		// 可以在这里添加Milvus配置
+	}
+
+	// 如果没有配置Milvus地址，跳过初始化（使用内存模式）
+	if milvusAddr == "" {
+		return nil
+	}
+
 	// 连接Milvus服务器
 	mc, err := client.NewClient(ctx, client.Config{
-		Address: "milvus-stand:19530", // 连接地址
+		Address: milvusAddr,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to connect to milvus: %w", err)
@@ -504,9 +515,20 @@ func (l *volcEngineLLMService) GenerateResponseWithTools(ctx context.Context, pr
 		"messages": messages,
 	}
 
-	// 如果有工具，添加到请求中
+	// 如果有工具，转换为 OpenAI 格式并添加到请求中
 	if len(tools) > 0 {
-		requestBody["tools"] = tools
+		var openAITools []map[string]interface{}
+		for _, tool := range tools {
+			openAITools = append(openAITools, map[string]interface{}{
+				"type": "function",
+				"function": map[string]interface{}{
+					"name":        tool.Name,
+					"description": tool.Description,
+					"parameters":  tool.Parameters,
+				},
+			})
+		}
+		requestBody["tools"] = openAITools
 	}
 
 	jsonBody, err := json.Marshal(requestBody)

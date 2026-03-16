@@ -21,6 +21,8 @@ type OrderRepo interface {
 	GetPendingOrders(ctx context.Context, limit int) ([]*model.Order, error)
 	// GetOrdersByRiderID 获取骑手的订单列表
 	GetOrdersByRiderID(ctx context.Context, riderID int64, status int32, page int, pageSize int) ([]*model.Order, int64, error)
+	// UpdateOrderStatusWithRider 使用单次查询更新订单状态和骑手ID（优化版）
+	UpdateOrderStatusWithRider(ctx context.Context, orderID int64, riderID int64) error
 }
 
 // orderRepo 订单相关的数据访问实现
@@ -97,4 +99,25 @@ func (r *orderRepo) GetOrdersByRiderID(ctx context.Context, riderID int64, statu
 	}
 
 	return orders, total, nil
+}
+
+// UpdateOrderStatusWithRider 使用单次查询更新订单状态和骑手ID（优化版）
+// 避免先查询再更新，直接使用UPDATE语句
+func (r *orderRepo) UpdateOrderStatusWithRider(ctx context.Context, orderID int64, riderID int64) error {
+	result := r.db.WithContext(ctx).Model(&model.Order{}).
+		Where("id = ? AND status = 0", orderID).
+		Updates(map[string]interface{}{
+			"status":   1,
+			"rider_id": riderID,
+		})
+	
+	if result.Error != nil {
+		return result.Error
+	}
+	
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	
+	return nil
 }

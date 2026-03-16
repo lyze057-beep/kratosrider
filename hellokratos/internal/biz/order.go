@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"hellokratos/internal/data"
@@ -101,7 +102,29 @@ func (uc *orderUsecase) CreateOrder(ctx context.Context, order *model.Order) err
 //	*model.Order: 订单信息
 //	error: 错误信息
 func (uc *orderUsecase) GetOrderByID(ctx context.Context, id int64) (*model.Order, error) {
-	return uc.orderRepo.GetOrderByID(ctx, id)
+	// 优化：添加Redis缓存
+	cacheKey := fmt.Sprintf("order:%d", id)
+
+	// 1. 先查缓存
+	cached, err := uc.rdb.Get(ctx, cacheKey).Result()
+	if err == nil {
+		var order model.Order
+		if err := json.Unmarshal([]byte(cached), &order); err == nil {
+			return &order, nil
+		}
+	}
+
+	// 2. 缓存未命中，查数据库
+	order, err := uc.orderRepo.GetOrderByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. 写入缓存（5分钟过期）
+	data, _ := json.Marshal(order)
+	uc.rdb.Set(ctx, cacheKey, data, 5*time.Minute)
+
+	return order, nil
 }
 
 // UpdateOrderStatus 更新订单状态
@@ -161,7 +184,7 @@ func (uc *orderUsecase) GetOrdersByRiderID(ctx context.Context, riderID int64, s
 	return uc.orderRepo.GetOrdersByRiderID(ctx, riderID, status, page, pageSize)
 }
 
-// AcceptOrder 接单
+// AcceptOrder 接单（优化版）
 //
 // 参数:
 //
@@ -173,56 +196,44 @@ func (uc *orderUsecase) GetOrdersByRiderID(ctx context.Context, riderID int64, s
 //
 //	error: 错误信息
 func (uc *orderUsecase) AcceptOrder(ctx context.Context, orderID int64, riderID int64) error {
-	// 使用Redis分布式锁防止并发接单
+	// 优化1：使用Pipeline批量执行Redis操作
 	lockKey := fmt.Sprintf("order:lock:%d", orderID)
 	lockValue := fmt.Sprintf("%d", riderID)
 
-	// 尝试获取锁，过期时间5秒
-	success, err := uc.rdb.SetNX(ctx, lockKey, lockValue, 5*time.Second).Result()
+	// 使用Pipeline批量执行Redis操作，减少网络往返
+	pipe := uc.rdb.Pipeline()
+	pipe.SetNX(ctx, lockKey, lockValue, 5*time.Second)
+	pipe.Expire(ctx, lockKey, 5*time.Second)
+	_, err := pipe.Exec(ctx)
 	if err != nil {
-		uc.log.Error("failed to acquire lock", "err", err)
+		uc.log.Error("failed to acquire lock with pipeline", "err", err)
 		return err
 	}
-	if !success {
-		return errors.New("订单正在被处理，请稍后再试")
-	}
+
 	// 释放锁
 	defer uc.rdb.Del(ctx, lockKey)
 
-	// 获取订单
-	order, err := uc.orderRepo.GetOrderByID(ctx, orderID)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return errors.New("订单不存在")
-		}
-		return err
-	}
-	// 检查订单状态
-	if order.Status != 0 {
-		return errors.New("订单已被接单")
-	}
-	// 更新订单状态和骑手ID
-	order.Status = 1
-	order.RiderID = riderID
-	err = uc.orderRepo.UpdateOrder(ctx, order)
-	if err != nil {
-		uc.log.Error("failed to update order", "err", err)
-		return err
+	// 优化2：使用单次数据库查询更新订单（避免先查询再更新）
+	result := uc.orderRepo.UpdateOrderStatusWithRider(ctx, orderID, riderID)
+	if result != nil {
+		uc.log.Error("failed to update order with rider", "err", result)
+		return result
 	}
 
-	// 发布订单接单消息
+	// 优化3：异步发布消息，不阻塞主流程
 	if uc.orderMessageProducer != nil {
-		msg := &data.OrderMessage{
-			OrderID: orderID,
-			RiderID: riderID,
-			Action:  "accept",
-			Status:  1,
-		}
-		err = uc.orderMessageProducer.PublishOrderMessage(ctx, msg)
-		if err != nil {
-			uc.log.Error("failed to publish order accept message", "err", err)
-			// 消息发布失败不影响订单状态更新
-		}
+		go func() {
+			msg := &data.OrderMessage{
+				OrderID: orderID,
+				RiderID: riderID,
+				Action:  "accept",
+				Status:  1,
+			}
+			err := uc.orderMessageProducer.PublishOrderMessage(ctx, msg)
+			if err != nil {
+				uc.log.Error("failed to publish order accept message", "err", err)
+			}
+		}()
 	}
 
 	return nil

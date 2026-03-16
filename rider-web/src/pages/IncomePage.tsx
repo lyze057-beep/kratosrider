@@ -17,7 +17,7 @@ const IncomePage: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const riderId = Number(userInfo?.user_id || 0);
+      const riderId = Number(userInfo?.userId || 0);
       const [totalRes, incomeRes, withdrawalRes] = await Promise.all([
         incomeApi.getTotalIncome(riderId),
         incomeApi.getIncomeList(riderId, 20),
@@ -40,7 +40,7 @@ const IncomePage: React.FC = () => {
 
   const handleWithdraw = async (values: any) => {
     try {
-      const riderId = Number(userInfo?.user_id || 0);
+      const riderId = Number(userInfo?.userId || 0);
       const result = await incomeApi.applyWithdrawal(
         riderId,
         parseFloat(values.amount),
@@ -184,7 +184,7 @@ const IncomePage: React.FC = () => {
         />
         <Table
           columns={activeTab === 'income' ? incomeColumns : withdrawalColumns}
-          dataSource={activeTab === 'income' ? incomes : withdrawals}
+          dataSource={activeTab === 'income' ? incomes : withdrawals as any}
           rowKey="id"
           loading={loading}
           pagination={{ pageSize: 10 }}

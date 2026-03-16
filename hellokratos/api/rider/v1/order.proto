@@ -54,6 +54,7 @@ message GetOrderListRequest {
   int32 status = 1; // -1表示全部状态
   int32 page = 2;
   int32 page_size = 3;
+  int64 rider_id = 4; // 骑手ID
 }
 
 // 获取订单列表响应

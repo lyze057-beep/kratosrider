@@ -55,9 +55,11 @@ func (m *SkillManager) Process(ctx context.Context, riderID int64, input string,
 	// 2. 查找合适的 Skill
 	skill := m.registry.FindSkill(ctx, intent, entities)
 	if skill == nil {
+		m.log.Warn("No skill found for intent", "intent", intent)
 		// 没有找到合适的 Skill，使用通用回复
 		return m.handleGeneralQuery(ctx, input, contextInfo)
 	}
+	m.log.Infof("Skill found: %s", skill.Name())
 
 	// 3. 构建 Skill 参数
 	params := ai.SkillParams{
@@ -69,6 +71,7 @@ func (m *SkillManager) Process(ctx context.Context, riderID int64, input string,
 	}
 
 	// 4. 执行 Skill
+	m.log.Infof("Executing skill: %s", skill.Name())
 	result, err := skill.Execute(ctx, params)
 	if err != nil {
 		m.log.Error("Skill execution failed", "skill", skill.Name(), "err", err)
@@ -77,6 +80,7 @@ func (m *SkillManager) Process(ctx context.Context, riderID int64, input string,
 			Response: "处理请求时出现错误，请稍后重试",
 		}, nil
 	}
+	m.log.Infof("Skill executed successfully: %s, success=%v", skill.Name(), result.Success)
 
 	return result, nil
 }
@@ -121,6 +125,10 @@ func (m *SkillManager) buildIntentRecognitionPrompt(input string) string {
 	prompt += "- delivery_problem: 配送问题\n"
 	prompt += "- query_income: 查询收入\n"
 	prompt += "- withdraw: 提现\n"
+	prompt += "- query_weather: 查询天气\n"
+	prompt += "- weather_forecast: 天气预报\n"
+	prompt += "- route_planning: 路线规划\n"
+	prompt += "- nearby_search: 附近搜索\n"
 	prompt += "- general: 通用问题\n"
 
 	prompt += "\n请以下面 JSON 格式返回结果：\n"
@@ -164,6 +172,21 @@ func (m *SkillManager) fallbackIntentRecognition(input string) (string, map[stri
 		return "withdraw", entities
 	}
 
+	// 天气相关
+	if strings.Contains(input, "天气") || strings.Contains(input, "下雨") || strings.Contains(input, "温度") ||
+		strings.Contains(input, "预报") || strings.Contains(input, "雾霾") || strings.Contains(input, "风") ||
+		strings.Contains(input, "雪") || strings.Contains(input, "热") || strings.Contains(input, "冷") ||
+		strings.Contains(input, "穿衣") || strings.Contains(input, "带伞") {
+		return "query_weather", entities
+	}
+
+	// 导航相关
+	if strings.Contains(input, "导航") || strings.Contains(input, "路线") || strings.Contains(input, "怎么走") ||
+		strings.Contains(input, "距离") || strings.Contains(input, "多远") || strings.Contains(input, "多久") ||
+		strings.Contains(input, "附近") || strings.Contains(input, "周边") || strings.Contains(input, "地图") {
+		return "route_planning", entities
+	}
+
 	return "general", entities
 }
 
@@ -201,6 +224,12 @@ func (m *SkillManager) extractIntentFromText(text string) string {
 	}
 	if strings.Contains(text, "withdraw") {
 		return "withdraw"
+	}
+	if strings.Contains(text, "weather") {
+		return "query_weather"
+	}
+	if strings.Contains(text, "navigation") || strings.Contains(text, "route") {
+		return "route_planning"
 	}
 	return "general"
 }

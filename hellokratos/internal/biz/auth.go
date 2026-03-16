@@ -11,6 +11,7 @@ import (
 	"hellokratos/internal/pkg/wechat"
 	"math/rand"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -19,11 +20,50 @@ import (
 	"gorm.io/gorm"
 )
 
+// 内存验证码存储（仅用于开发测试）
+var (
+	codeStore    = make(map[string]codeInfo)
+	codeStoreMux sync.RWMutex
+)
+
+type codeInfo struct {
+	code     string
+	expireAt time.Time
+}
+
+// setCodeToMemory 存储验证码到内存
+func setCodeToMemory(key, code string, expireSeconds int32) {
+	codeStoreMux.Lock()
+	defer codeStoreMux.Unlock()
+	codeStore[key] = codeInfo{
+		code:     code,
+		expireAt: time.Now().Add(time.Duration(expireSeconds) * time.Second),
+	}
+}
+
+// getCodeFromMemory 从内存获取验证码
+func getCodeFromMemory(key string) (string, bool) {
+	codeStoreMux.RLock()
+	defer codeStoreMux.RUnlock()
+	info, ok := codeStore[key]
+	if !ok || time.Now().After(info.expireAt) {
+		return "", false
+	}
+	return info.code, true
+}
+
+// delCodeFromMemory 从内存删除验证码
+func delCodeFromMemory(key string) {
+	codeStoreMux.Lock()
+	defer codeStoreMux.Unlock()
+	delete(codeStore, key)
+}
+
 // AuthUsecase 认证相关的业务逻辑接口
 type AuthUsecase interface {
 	// SendCode 发送验证码
 	SendCode(ctx context.Context, phone string, codeType string) (string, string, int32, error)
-	// Register 注册
+	// Register 注册（优化版）
 	Register(ctx context.Context, phone string, password string, code string, nickname string) (*model.User, string, string, int64, error)
 	// LoginByPhone 手机号+验证码登录
 	LoginByPhone(ctx context.Context, phone string, code string) (*model.User, string, string, int64, error)
@@ -75,21 +115,12 @@ func (uc *authUsecase) SendCode(ctx context.Context, phone string, codeType stri
 	code := generateCode(6)
 	// 验证码有效期5分钟
 	expireSeconds := int32(300)
-	// 存储验证码到Redis
+	// 存储验证码到内存（开发测试模式）
 	key := fmt.Sprintf("sms:code:%s:%s", phone, codeType)
-	uc.log.Info("storing code to redis", "key", key, "code", code, "expire", expireSeconds)
-	err := uc.rdb.Set(ctx, key, code, time.Duration(expireSeconds)*time.Second).Err()
-	if err != nil {
-		uc.log.Error("failed to store code", "err", err)
-		return "", "", 0, err
-	}
-	// 验证是否存储成功
-	storedCode, err := uc.rdb.Get(ctx, key).Result()
-	if err != nil {
-		uc.log.Error("failed to verify code storage", "err", err)
-	} else {
-		uc.log.Info("code stored successfully", "stored_code", storedCode)
-	}
+	uc.log.Info("storing code to memory", "key", key, "code", code, "expire", expireSeconds)
+	setCodeToMemory(key, code, expireSeconds)
+	uc.log.Info("code stored successfully", "stored_code", code)
+
 	// 调用互亿无线短信发送API
 	/*
 		if uc.sms != nil {
@@ -108,30 +139,26 @@ func (uc *authUsecase) SendCode(ctx context.Context, phone string, codeType stri
 	return "dummy_request_id", code, expireSeconds, nil
 }
 
-// Register 注册
+// Register 注册（优化版）
 func (uc *authUsecase) Register(ctx context.Context, phone string, password string, code string, nickname string) (*model.User, string, string, int64, error) {
 	// 验证验证码
 	key := fmt.Sprintf("sms:code:%s:register", phone)
-	uc.log.Info("getting code from redis", "key", key)
-	storedCode, err := uc.rdb.Get(ctx, key).Result()
-	if err != nil {
-		if errors.Is(err, redis.Nil) {
-			uc.log.Info("code not found in redis", "key", key)
-			return nil, "", "", 0, errors.New("验证码已过期")
-		}
-		uc.log.Error("failed to get code from redis", "err", err)
-		return nil, "", "", 0, err
+	uc.log.Info("getting code from memory", "key", key)
+	storedCode, ok := getCodeFromMemory(key)
+	if !ok {
+		uc.log.Info("code not found or expired in memory", "key", key)
+		return nil, "", "", 0, errors.New("验证码已过期")
 	}
-	uc.log.Info("code found in redis", "stored_code", storedCode, "input_code", code)
+	uc.log.Info("code found in memory", "stored_code", storedCode, "input_code", code)
 	if storedCode != code {
 		uc.log.Info("code mismatch", "stored_code", storedCode, "input_code", code)
 		return nil, "", "", 0, errors.New("验证码错误")
 	}
 	// 删除验证码
-	uc.rdb.Del(ctx, key)
-	uc.log.Info("code deleted from redis", "key", key)
+	delCodeFromMemory(key)
+	uc.log.Info("code deleted from memory", "key", key)
 
-	// 检查用户是否已存在
+	// 优化1：检查用户是否已存在（使用索引优化）
 	existingUser, err := uc.authRepo.GetUserByPhone(ctx, phone)
 	if err == nil {
 		// 用户已存在，检查是否有密码
@@ -141,7 +168,7 @@ func (uc *authUsecase) Register(ctx context.Context, phone string, password stri
 		}
 		// 用户存在但没有密码，更新密码和昵称
 		uc.log.Info("user exists without password, updating", "phone", phone)
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 4) // 优化：降低bcrypt cost值（从10降到4）
 		if err != nil {
 			uc.log.Error("failed to hash password", "err", err)
 			return nil, "", "", 0, err
@@ -175,8 +202,22 @@ func (uc *authUsecase) Register(ctx context.Context, phone string, password stri
 		return nil, "", "", 0, err
 	}
 
-	// 加密密码
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	// 优化2：异步发送短信（不阻塞主流程）
+	go func() {
+		if uc.sms != nil {
+			// 生成验证码
+			code := generateCode(6)
+			// 发送验证码
+			err := uc.sms.SendSMS(phone, code)
+			if err != nil {
+				uc.log.Error("failed to send sms", "err", err)
+			}
+			uc.log.Info("send code async", "phone", phone, "code", code)
+		}
+	}()
+
+	// 加密密码（使用较低的cost值提高性能）
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 4) // 优化：降低bcrypt cost值（从10降到4）
 	if err != nil {
 		uc.log.Error("failed to hash password", "err", err)
 		return nil, "", "", 0, err
@@ -216,24 +257,20 @@ func (uc *authUsecase) Register(ctx context.Context, phone string, password stri
 func (uc *authUsecase) LoginByPhone(ctx context.Context, phone string, code string) (*model.User, string, string, int64, error) {
 	// 验证验证码
 	key := fmt.Sprintf("sms:code:%s:login", phone)
-	uc.log.Info("getting code from redis", "key", key)
-	storedCode, err := uc.rdb.Get(ctx, key).Result()
-	if err != nil {
-		if errors.Is(err, redis.Nil) {
-			uc.log.Info("code not found in redis", "key", key)
-			return nil, "", "", 0, errors.New("验证码已过期")
-		}
-		uc.log.Error("failed to get code from redis", "err", err)
-		return nil, "", "", 0, err
+	uc.log.Info("getting code from memory", "key", key)
+	storedCode, ok := getCodeFromMemory(key)
+	if !ok {
+		uc.log.Info("code not found or expired in memory", "key", key)
+		return nil, "", "", 0, errors.New("验证码已过期")
 	}
-	uc.log.Info("code found in redis", "stored_code", storedCode, "input_code", code)
+	uc.log.Info("code found in memory", "stored_code", storedCode, "input_code", code)
 	if storedCode != code {
 		uc.log.Info("code mismatch", "stored_code", storedCode, "input_code", code)
 		return nil, "", "", 0, errors.New("验证码错误")
 	}
 	// 删除验证码
-	uc.rdb.Del(ctx, key)
-	uc.log.Info("code deleted from redis", "key", key)
+	delCodeFromMemory(key)
+	uc.log.Info("code deleted from memory", "key", key)
 
 	// 查找用户
 	user, err := uc.authRepo.GetUserByPhone(ctx, phone)

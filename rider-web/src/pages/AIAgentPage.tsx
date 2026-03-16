@@ -29,7 +29,7 @@ const AIAgentPage: React.FC = () => {
 
   const loadChatHistory = async () => {
     try {
-      const result = await aiAgentApi.getChatHistory(Number(userInfo?.user_id || 0), 20);
+      const result = await aiAgentApi.getChatHistory(Number(userInfo?.userId || 0), 20);
       setMessages(result.messages || []);
     } catch (error) {
       console.error('Load chat history error:', error);
@@ -47,7 +47,7 @@ const AIAgentPage: React.FC = () => {
 
     const userMessage: AIAgentChatMessage = {
       id: Date.now(),
-      rider_id: Number(userInfo?.user_id || 0),
+      rider_id: Number(userInfo?.userId || 0),
       content,
       message_type: MESSAGE_TYPE.USER,
       content_type: 0,
@@ -58,22 +58,30 @@ const AIAgentPage: React.FC = () => {
 
     try {
       const result = await aiAgentApi.sendMessage(
-        Number(userInfo?.user_id || 0),
+        Number(userInfo?.userId || 0),
         content
       );
 
-      if (result.success && result.ai_response) {
+      console.log('AI response:', result);
+
+      // 支持驼峰命名和蛇形命名
+      const aiResponse = result.ai_response || result.aiResponse;
+      
+      if (result.success && aiResponse) {
         const aiMessage: AIAgentChatMessage = {
           id: Date.now() + 1,
-          rider_id: Number(userInfo?.user_id || 0),
-          content: result.ai_response.content,
+          rider_id: Number(userInfo?.userId || 0),
+          content: aiResponse.content || aiResponse.Content || '',
           message_type: MESSAGE_TYPE.AI,
           content_type: 0,
-          created_at: result.ai_response.created_at,
+          created_at: aiResponse.created_at || aiResponse.CreatedAt || new Date().toISOString(),
         };
         setMessages((prev) => [...prev, aiMessage]);
+      } else if (!result.success) {
+        message.error(result.message || 'AI回复失败');
       }
     } catch (error: any) {
+      console.error('Send message error:', error);
       message.error(error.response?.data?.message || '发送失败');
     } finally {
       setLoading(false);

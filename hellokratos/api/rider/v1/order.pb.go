@@ -7,11 +7,12 @@
 package v1
 
 import (
+	reflect "reflect"
+	sync "sync"
+
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	reflect "reflect"
-	sync "sync"
 )
 
 const (
@@ -30,6 +31,7 @@ type GetOrderListRequest struct {
 	Status   int32 `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"` // -1表示全部状态
 	Page     int32 `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize int32 `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	RiderId  int64 `protobuf:"varint,4,opt,name=rider_id,json=riderId,proto3" json:"rider_id,omitempty"` // 骑手ID
 }
 
 func (x *GetOrderListRequest) Reset() {
@@ -81,6 +83,13 @@ func (x *GetOrderListRequest) GetPage() int32 {
 func (x *GetOrderListRequest) GetPageSize() int32 {
 	if x != nil {
 		return x.PageSize
+	}
+	return 0
+}
+
+func (x *GetOrderListRequest) GetRiderId() int64 {
+	if x != nil {
+		return x.RiderId
 	}
 	return 0
 }

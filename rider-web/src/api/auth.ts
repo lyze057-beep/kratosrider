@@ -1,7 +1,7 @@
 import apiClient from './client';
 
 export interface UserInfo {
-  user_id: string;
+  userId: string;
   phone: string;
   nickname: string;
   avatar: string;
@@ -9,11 +9,11 @@ export interface UserInfo {
 }
 
 export interface LoginReply {
-  user_id: string;
+  userId: string;
   token: string;
-  refresh_token: string;
-  expires_in: number;
-  user_info: UserInfo;
+  refreshToken: string;
+  expiresIn: number;
+  userInfo: UserInfo;
 }
 
 export const authApi = {

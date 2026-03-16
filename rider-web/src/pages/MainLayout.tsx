@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Menu, Avatar, Dropdown, Button } from 'antd';
+import { Layout, Menu, Avatar, Dropdown } from 'antd';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
   FileTextOutlined, 
@@ -7,7 +7,13 @@ import {
   RobotOutlined, 
   UserOutlined,
   LogoutOutlined,
-  SettingOutlined
+  SettingOutlined,
+  MessageOutlined,
+  SafetyCertificateOutlined,
+  CustomerServiceOutlined,
+  ShareAltOutlined,
+  StarOutlined,
+  DeleteOutlined
 } from '@ant-design/icons';
 import { useAuthStore } from '../store/authStore';
 import { authApi } from '../api/auth';
@@ -21,7 +27,7 @@ const MainLayout: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await authApi.logout(userInfo?.user_id || '');
+      await authApi.logout(userInfo?.userId || '');
       logout();
       navigate('/login');
     } catch (error) {
@@ -46,6 +52,41 @@ const MainLayout: React.FC = () => {
       icon: <RobotOutlined />,
       label: 'AI助手',
     },
+    {
+      key: '/messages',
+      icon: <MessageOutlined />,
+      label: '消息中心',
+    },
+    {
+      key: '/qualification',
+      icon: <SafetyCertificateOutlined />,
+      label: '资质认证',
+    },
+    {
+      key: '/profile',
+      icon: <UserOutlined />,
+      label: '个人中心',
+    },
+    {
+      key: '/tickets',
+      icon: <CustomerServiceOutlined />,
+      label: '工单中心',
+    },
+    {
+      key: '/referral',
+      icon: <ShareAltOutlined />,
+      label: '拉新推广',
+    },
+    {
+      key: '/rating',
+      icon: <StarOutlined />,
+      label: '我的评价',
+    },
+    {
+      key: '/deactivation',
+      icon: <DeleteOutlined />,
+      label: '账号注销',
+    },
   ];
 
   const userMenuItems = [
@@ -53,11 +94,13 @@ const MainLayout: React.FC = () => {
       key: 'profile',
       icon: <UserOutlined />,
       label: '个人资料',
+      onClick: () => navigate('/profile'),
     },
     {
       key: 'settings',
       icon: <SettingOutlined />,
       label: '设置',
+      onClick: () => navigate('/profile'),
     },
     {
       type: 'divider' as const,

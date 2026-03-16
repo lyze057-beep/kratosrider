@@ -7,7 +7,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/rider': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:8001',
         changeOrigin: true
       }
     }

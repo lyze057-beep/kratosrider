@@ -7,6 +7,7 @@ interface AuthState {
   refreshToken: string | null;
   userInfo: UserInfo | null;
   setAuth: (token: string, refreshToken: string, userInfo: UserInfo) => void;
+  setUserInfo: (userInfo: UserInfo) => void;
   logout: () => void;
   loadStoredAuth: () => void;
 }
@@ -27,6 +28,11 @@ export const useAuthStore = create<AuthState>((set) => ({
       refreshToken,
       userInfo,
     });
+  },
+
+  setUserInfo: (userInfo) => {
+    localStorage.setItem('userInfo', JSON.stringify(userInfo));
+    set({ userInfo });
   },
 
   logout: () => {
